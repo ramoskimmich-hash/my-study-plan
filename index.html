@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Tracker 2026</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .day-card { min-height: 70px; transition: all 0.2s; border: 1px solid #e2e8f0; border-radius: 8px; position: relative; }
+        .studied { background-color: #dcfce7 !important; border-color: #22c55e !important; }
+        .missed { background-color: #fee2e2 !important; border-color: #ef4444 !important; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+        button { cursor: pointer; }
+    </style>
+</head>
+<body class="bg-slate-50 p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto">
+        <header class="flex flex-col md:flex-row justify-between items-center mb-10 sticky top-0 bg-slate-50 py-4 z-20 border-b">
+            <div>
+                <h1 class="text-2xl font-black text-slate-800 uppercase tracking-tighter">Study Plan 2026</h1>
+                <p class="text-slate-500 text-sm">Feb 27 — Oct 20</p>
+            </div>
+            
+            <div id="stats-display" class="mt-4 md:mt-0 bg-white px-6 py-3 rounded-2xl shadow-sm border border-slate-200">
+                </div>
+        </header>
+
+        <div id="calendar-container" class="space-y-10 pb-20"></div>
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        const startDate = new Date(2026, 1, 27); // Feb 27
+        const endDate = new Date(2026, 9, 20);   // Oct 20
+        const storageKey = 'study_tracker_data';
+
+        // Load data from LocalStorage
+        let studyData = JSON.parse(localStorage.getItem(storageKey)) || {};
+
+        // --- CALENDAR GENERATION ---
+        const container = document.getElementById('calendar-container');
+
+        function initCalendar() {
+            let current = new Date(startDate);
+            let currentMonth = -1;
+            let monthWrapper;
+
+            while (current <= endDate) {
+                if (current.getMonth() !== currentMonth) {
+                    currentMonth = current.getMonth();
+                    monthWrapper = document.createElement('div');
+                    const monthName = current.toLocaleString('default', { month: 'long' });
+                    
+                    monthWrapper.innerHTML = `
+                        <h2 class="text-lg font-bold text-slate-700 mb-3">${monthName}</h2>
+                        <div class="calendar-grid text-[10px] font-bold text-slate-400 uppercase mb-2">
+                            <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div>
+                        </div>
+                        <div class="calendar-grid"></div>
+                    `;
+                    container.appendChild(monthWrapper);
+                    
+                    // Align first day
+                    const grid = monthWrapper.querySelector('.calendar-grid:last-child');
+                    let dayOfWeek = current.getDay(); 
+                    let offset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+                    for(let i=0; i<offset; i++) grid.innerHTML += '<div></div>';
+                }
+
+                const dateStr = current.toISOString().split('T')[0];
+                const grid = monthWrapper.querySelector('.calendar-grid:last-child');
+                const dayDiv = document.createElement('div');
+                dayDiv.id = `date-${dateStr}`;
+                renderDay(dayDiv, dateStr, current.getDate());
+                grid.appendChild(dayDiv);
+                
+                current.setDate(current.getDate() + 1);
+            }
+            updateStats();
+        }
+
+        function renderDay(container, dateStr, dayNum) {
+            const status = studyData[dateStr] || 'none';
+            container.className = `day-card bg-white p-2 flex flex-col justify-between group ${status === 'done' ? 'studied' : status === 'missed' ? 'missed' : ''}`;
+            
+            if (status === 'none') {
+                container.innerHTML = `
+                    <span class="text-slate-400 text-xs">${dayNum}</span>
+                    <div class="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onclick="updateDay('${dateStr}', 'done')" class="text-[9px] bg-green-500 text-white rounded py-0.5">✔ Done</button>
+                        <button onclick="updateDay('${dateStr}', 'missed')" class="text-[9px] bg-red-400 text-white rounded py-0.5">✘ Miss</button>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <span class="text-xs font-bold text-slate-800">${dayNum}</span>
+                    <span class="text-[9px] font-bold uppercase tracking-wider">${status === 'done' ? 'LEARNT' : 'MISSED'}</span>
+                    <button onclick="updateDay('${dateStr}', 'none')" class="text-[9px] underline text-slate-400 opacity-0 group-hover:opacity-100">Reset</button>
+                `;
+            }
+        }
+
+        // --- LOGIC ---
+        window.updateDay = function(dateStr, status) {
+            if (status === 'none') delete studyData[dateStr];
+            else studyData[dateStr] = status;
+            
+            localStorage.setItem(storageKey, JSON.stringify(studyData));
+            const el = document.getElementById(`date-${dateStr}`);
+            renderDay(el, dateStr, new Date(dateStr).getDate());
+            updateStats();
+        };
+
+        function updateStats() {
+            const total = Object.keys(studyData).length;
+            const done = Object.values(studyData).filter(v => v === 'done').length;
+            const percentage = total > 0 ? Math.round((done / total) * 100) : 0;
+
+            document.getElementById('stats-display').innerHTML = `
+                <div class="flex gap-6 items-center">
+                    <div class="text-center">
+                        <p class="text-[10px] text-slate-400 font-bold uppercase">Days Logged</p>
+                        <p class="text-xl font-bold text-slate-800">${total}</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-[10px] text-slate-400 font-bold uppercase">Success Rate</p>
+                        <p class="text-xl font-bold text-green-600">${percentage}%</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        initCalendar();
+    </script>
+</body>
+</html>
