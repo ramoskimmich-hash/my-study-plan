@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-<<meta name="google-site-verification" content="XoctynnWp1jOm9Zgy8dpKz-T67dWQjtS6LAwkfIrOiY" />>
+<head>
+    <meta name="google-site-verification" content="XoctynnWp1jOm9Zgy8dpKz-T67dWQjtS6LAwkfIrOiY" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Study Tracker 2026</title>
+    
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -31,15 +33,11 @@
     </div>
 
     <script>
-        // --- CONFIGURATION ---
         const startDate = new Date(2026, 1, 27); // Feb 27
         const endDate = new Date(2026, 9, 20);   // Oct 20
         const storageKey = 'study_tracker_data';
 
-        // Load data from LocalStorage
         let studyData = JSON.parse(localStorage.getItem(storageKey)) || {};
-
-        // --- CALENDAR GENERATION ---
         const container = document.getElementById('calendar-container');
 
         function initCalendar() {
@@ -62,7 +60,6 @@
                     `;
                     container.appendChild(monthWrapper);
                     
-                    // Align first day
                     const grid = monthWrapper.querySelector('.calendar-grid:last-child');
                     let dayOfWeek = current.getDay(); 
                     let offset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
@@ -102,11 +99,9 @@
             }
         }
 
-        // --- LOGIC ---
         window.updateDay = function(dateStr, status) {
             if (status === 'none') delete studyData[dateStr];
             else studyData[dateStr] = status;
-            
             localStorage.setItem(storageKey, JSON.stringify(studyData));
             const el = document.getElementById(`date-${dateStr}`);
             renderDay(el, dateStr, new Date(dateStr).getDate());
@@ -131,8 +126,4 @@
                 </div>
             `;
         }
-
-        initCalendar();
-    </script>
-</body>
-</html>
+     
