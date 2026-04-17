@@ -3,92 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Study Tracker 2026 Pro</title>
+    <title>Study Tracker 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        .day-card { min-height: 75px; transition: all 0.2s; border: 1px solid #e2e8f0; border-radius: 12px; position: relative; }
+        .day-card { min-height: 70px; transition: all 0.2s; border: 1px solid #e2e8f0; border-radius: 8px; }
         .studied { background-color: #dcfce7 !important; border-color: #22c55e !important; }
         .missed { background-color: #fee2e2 !important; border-color: #ef4444 !important; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
-        
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
         /* Focus Mode Theme */
-        .focus-mode { background-color: #0f172a !important; color: white !important; transition: 0.5s; }
+        body.focus-mode { background-color: #0f172a !important; color: white !important; }
         .focus-mode .bg-white { background-color: #1e293b !important; color: white !important; border-color: #334155 !important; }
-        .focus-mode .text-slate-800 { color: #f8fafc !important; }
-        .focus-mode .month-title { color: #60a5fa !important; }
-        
-        .tab-active { border-bottom: 4px solid #3b82f6; color: #3b82f6; }
-        
-        /* Pie Chart Styles */
-        .pie-chart {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: conic-gradient(#22c55e 0% 0%, #ef4444 0% 0%, #e2e8f0 0% 100%);
-            transition: background 0.5s ease;
-        }
-
-        /* Timer Input Styles */
-        .timer-input {
-            background: transparent;
-            width: 140px;
-            text-align: center;
-            outline: none;
-            border-bottom: 4px solid transparent;
-            transition: border-color 0.3s;
-        }
-        .timer-input:focus { border-color: #3b82f6; }
-        
-        input::-webkit-outer-spin-button,
-        input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        input[type=number] { -moz-appearance: textfield; }
+        .focus-mode h1, .focus-mode h2 { color: #f8fafc !important; }
     </style>
 </head>
-<body class="bg-slate-50 p-4 md:p-8 transition-colors duration-500" id="body">
+<body class="bg-slate-50 p-4 md:p-8 transition-colors duration-500">
 
     <div class="max-w-4xl mx-auto">
-        <header class="mb-10">
-            <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-                <div>
-                    <h1 class="text-3xl font-black text-slate-800 uppercase tracking-tighter" id="title">Study Plan 2026</h1>
-                    <p class="text-slate-500 text-sm font-bold">Feb 27 — Oct 20</p>
-                </div>
-                
-                <div id="stats-display" class="flex items-center gap-6 bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                    </div>
-            </div>
+        <div id="timer-box" class="bg-white p-6 rounded-2xl shadow-lg mb-8 text-center border-2 border-slate-200">
+            <h2 class="text-xl font-bold mb-4" id="timer-display">25:00</h2>
+            <button onclick="startTimer()" id="start-btn" class="bg-indigo-600 text-white px-6 py-2 rounded-full font-bold">Start Focus Session</button>
+        </div>
 
-            <div class="flex gap-8 border-b border-slate-200">
-                <button onclick="switchTab('calendar')" id="btn-calendar" class="pb-3 font-bold tab-active transition-all">Calendar</button>
-                <button onclick="switchTab('timer')" id="btn-timer" class="pb-3 font-bold text-slate-400 hover:text-slate-600 transition-all">Study Timer</button>
-            </div>
-        </header>
-
-        <div id="view-calendar" class="space-y-12 pb-24"></div>
-
-        <div id="view-timer" class="hidden flex flex-col items-center justify-center py-24">
-            <div class="flex items-center text-9xl font-black mb-6">
-                <input type="number" id="input-min" value="25" class="timer-input" min="0" max="999">
-                <span class="mb-4">:</span>
-                <input type="number" id="input-sec" value="00" class="timer-input" min="0" max="59">
-            </div>
-            <p class="mb-12 text-slate-400 uppercase text-sm font-bold tracking-widest" id="timer-status">Adjust minutes and press start</p>
-            
-            <div class="flex gap-6">
-                <button onclick="startTimer()" id="start-btn" class="px-12 py-5 bg-blue-600 text-white rounded-full font-bold hover:bg-blue-700 shadow-xl transition-all active:scale-95">Start Focus</button>
-                <button onclick="resetTimer()" class="px-12 py-5 bg-slate-200 text-slate-700 rounded-full font-bold hover:bg-slate-300 transition-all">Reset</button>
+        <div class="grid md:grid-cols-2 gap-8 mb-10">
+            <div id="stats-display" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200"></div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <canvas id="progressChart" width="200" height="200"></canvas>
             </div>
         </div>
+
+        <div id="calendar-container" class="space-y-10"></div>
     </div>
 
     <script>
-        const startDate = new Date(2026, 1, 27);
-        const endDate = new Date(2026, 9, 20);
-        const storageKey = 'study_tracker_data_v2';
-        let studyData = JSON.parse(localStorage.getItem(storageKey)) || {};
-        
-        let timerInterval = null;
-        let totalSeconds = 0;
+        // --- Timer Logic ---
+        let timeLeft = 25 * 60;
+        let timerInterval;
+        const timerDisplay = document.getElementById('timer-display');
 
-        function switchTab(view) {
-            document.getElementById('view-calendar').classList.toggle('hidden', view !== 'calendar');
+        function startTimer() {
+            document.body.classList.add('focus-mode');
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                let mins = Math.floor(timeLeft / 60);
+                let secs = timeLeft % 60;
+                timerDisplay.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    document.body.classList.remove('focus-mode');
+                    alert("Focus session complete!");
+                }
+            }, 1000);
+        }
+
+        // --- Chart Logic ---
+        let myChart;
+        function updateChart(done, missed) {
+            const ctx = document.getElementById('progressChart').getContext('2d');
+            if (myChart) myChart.destroy();
+            myChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Learnt', 'Missed'],
+                    datasets: [{
+                        data: [done, missed],
+                        backgroundColor: ['#22c55e', '#ef4444']
+                    }]
+                }
+            });
+        }
+
+        // ... (Include your existing initCalendar and updateDay logic here)
+        
+        function updateStats() {
+            const total = Object.keys(studyData).length;
+            const done = Object.values(studyData).filter(v => v === 'done').length;
+            const missed = Object.values(studyData).filter(v => v === 'missed').length;
+            
+            document.getElementById('stats-display').innerHTML = `
+                <p class="text-sm text-slate-400 font-bold uppercase">Progress Overview</p>
+                <p class="text-3xl font-black">${done} / ${done + missed} Completed</p>
+            `;
+            updateChart(done, missed);
+        }
+        
+        initCalendar();
+    </script>
+</body>
+</html>
