@@ -12,6 +12,7 @@
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
         .focus-mode { background-color: #0f172a !important; color: white !important; transition: 0.5s; }
         .tab-active { border-bottom: 2px solid #3b82f6; color: #3b82f6; }
+        
         /* Pie Chart Styles */
         .pie-chart {
             width: 100px;
@@ -19,6 +20,11 @@
             border-radius: 50%;
             background: conic-gradient(#22c55e 0% 0%, #ef4444 0% 0%, #e2e8f0 0% 100%);
         }
+
+        /* Chrome, Safari, Edge, Opera - Remove arrows from number input */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
     </style>
 </head>
 <body class="bg-slate-50 p-4 md:p-8 transition-colors duration-500" id="body">
@@ -43,11 +49,19 @@
         <div id="view-calendar" class="space-y-10 pb-20"></div>
 
         <div id="view-timer" class="hidden flex flex-col items-center justify-center py-20">
-            <div id="timer-display" class="text-8xl font-black mb-8">25:00</div>
-            <div class="flex gap-4">
-                <button onclick="startTimer()" id="start-btn" class="px-8 py-3 bg-blue-600 text-white rounded-full font-bold hover:bg-blue-700">Start Focus</button>
-                <button onclick="resetTimer()" class="px-8 py-3 bg-slate-200 text-slate-700 rounded-full font-bold">Reset</button>
+            <div class="flex items-center justify-center mb-8">
+                <input type="number" id="timer-min" value="25" min="1" max="999" 
+                    class="text-8xl font-black bg-transparent text-center w-48 focus:outline-none border-b-4 border-transparent focus:border-blue-500 transition-all">
+                <span class="text-8xl font-black">:</span>
+                <input type="number" id="timer-sec" value="00" min="0" max="59" 
+                    class="text-8xl font-black bg-transparent text-center w-48 focus:outline-none border-b-4 border-transparent focus:border-blue-500 transition-all">
             </div>
+            
+            <div class="flex gap-4">
+                <button onclick="startTimer()" id="start-btn" class="px-8 py-3 bg-blue-600 text-white rounded-full font-bold hover:bg-blue-700 transition-all active:scale-95">Start Focus</button>
+                <button onclick="resetTimer()" class="px-8 py-3 bg-slate-200 text-slate-700 rounded-full font-bold hover:bg-slate-300">Reset</button>
+            </div>
+            <p class="mt-6 text-slate-400 text-sm font-medium uppercase tracking-widest" id="timer-hint">Click numbers to adjust time</p>
         </div>
     </div>
 
@@ -56,131 +70,4 @@
         const startDate = new Date(2026, 1, 27);
         const endDate = new Date(2026, 9, 20);
         const storageKey = 'study_tracker_data';
-        let studyData = JSON.parse(localStorage.getItem(storageKey)) || {};
-        
-        let timeLeft = 25 * 60;
-        let timerInterval = null;
-
-        // --- Tabs ---
-        function switchTab(view) {
-            document.getElementById('view-calendar').classList.toggle('hidden', view !== 'calendar');
-            document.getElementById('view-timer').classList.toggle('hidden', view !== 'timer');
-            document.getElementById('btn-calendar').classList.toggle('tab-active', view === 'calendar');
-            document.getElementById('btn-calendar').classList.toggle('text-slate-400', view !== 'calendar');
-            document.getElementById('btn-timer').classList.toggle('tab-active', view === 'timer');
-            document.getElementById('btn-timer').classList.toggle('text-slate-400', view !== 'timer');
-        }
-
-        // --- Timer Logic ---
-        function startTimer() {
-            if(timerInterval) return;
-            document.getElementById('body').classList.add('focus-mode');
-            document.getElementById('title').classList.add('text-white');
-            
-            timerInterval = setInterval(() => {
-                timeLeft--;
-                const mins = Math.floor(timeLeft / 60);
-                const secs = timeLeft % 60;
-                document.getElementById('timer-display').innerText = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
-                
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    timerInterval = null;
-                    alert("Time's up! Great work.");
-                    resetTimer();
-                }
-            }, 1000);
-        }
-
-        function resetTimer() {
-            clearInterval(timerInterval);
-            timerInterval = null;
-            timeLeft = 25 * 60;
-            document.getElementById('timer-display').innerText = "25:00";
-            document.getElementById('body').classList.remove('focus-mode');
-            document.getElementById('title').classList.remove('text-white');
-        }
-
-        // --- Calendar Logic ---
-        const container = document.getElementById('view-calendar');
-
-        function initCalendar() {
-            let current = new Date(startDate);
-            let currentMonth = -1;
-            
-            while (current <= endDate) {
-                if (current.getMonth() !== currentMonth) {
-                    currentMonth = current.getMonth();
-                    const monthWrapper = document.createElement('div');
-                    const monthName = current.toLocaleString('default', { month: 'long' });
-                    monthWrapper.innerHTML = `
-                        <h2 class="text-lg font-bold text-slate-700 mb-3">${monthName}</h2>
-                        <div class="calendar-grid text-[10px] font-bold text-slate-400 uppercase mb-2">
-                            <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div>
-                        </div>
-                        <div class="calendar-grid"></div>
-                    `;
-                    container.appendChild(monthWrapper);
-                }
-                const grid = container.lastElementChild.querySelector('.calendar-grid:last-child');
-                const dateStr = current.toISOString().split('T')[0];
-                const dayDiv = document.createElement('div');
-                dayDiv.id = `date-${dateStr}`;
-                renderDay(dayDiv, dateStr, current.getDate());
-                grid.appendChild(dayDiv);
-                current.setDate(current.getDate() + 1);
-            }
-            updateStats();
-        }
-
-        function renderDay(container, dateStr, dayNum) {
-            const status = studyData[dateStr] || 'none';
-            container.className = `day-card bg-white p-2 flex flex-col justify-between group ${status === 'done' ? 'studied' : status === 'missed' ? 'missed' : ''}`;
-            container.innerHTML = status === 'none' ? `
-                <span class="text-slate-400 text-xs">${dayNum}</span>
-                <div class="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onclick="updateDay('${dateStr}', 'done')" class="text-[9px] bg-green-500 text-white rounded py-0.5">✔ Done</button>
-                    <button onclick="updateDay('${dateStr}', 'missed')" class="text-[9px] bg-red-400 text-white rounded py-0.5">✘ Miss</button>
-                </div>
-            ` : `
-                <span class="text-xs font-bold text-slate-800">${dayNum}</span>
-                <span class="text-[9px] font-bold uppercase tracking-wider">${status === 'done' ? 'LEARNT' : 'MISSED'}</span>
-                <button onclick="updateDay('${dateStr}', 'none')" class="text-[9px] underline text-slate-400 opacity-0 group-hover:opacity-100">Reset</button>
-            `;
-        }
-
-        window.updateDay = function(dateStr, status) {
-            if (status === 'none') delete studyData[dateStr];
-            else studyData[dateStr] = status;
-            localStorage.setItem(storageKey, JSON.stringify(studyData));
-            const el = document.getElementById(`date-${dateStr}`);
-            renderDay(el, dateStr, new Date(dateStr).getDate());
-            updateStats();
-        };
-
-        function updateStats() {
-            const total = Object.keys(studyData).length;
-            const done = Object.values(studyData).filter(v => v === 'done').length;
-            const missed = Object.values(studyData).filter(v => v === 'missed').length;
-            const percentage = total > 0 ? Math.round((done / total) * 100) : 0;
-
-            // Calculate Pie Chart Segments
-            const totalItems = (done + missed) || 1;
-            const donePercent = (done / totalItems) * 100;
-            const missedPercent = (missed / totalItems) * 100;
-            
-            document.getElementById('stats-display').innerHTML = `
-                <div class="pie-chart" style="background: conic-gradient(#22c55e 0% ${donePercent}%, #ef4444 ${donePercent}% ${donePercent + missedPercent}%, #e2e8f0 ${donePercent + missedPercent}% 100%)"></div>
-                <div class="flex flex-col gap-2">
-                    <div class="text-center">
-                        <p class="text-[10px] text-slate-400 font-bold uppercase">Success Rate</p>
-                        <p class="text-xl font-bold text-slate-800">${percentage}%</p>
-                    </div>
-                </div>
-            `;
-        }
-
-        initCalendar();
-    </script>
-</body>
-</html>
+        let studyData = JSON.parse(localStorage.getItem(storageKey
