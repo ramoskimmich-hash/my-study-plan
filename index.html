@@ -1,94 +1,193 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+
+    <meta name="google-site-verification" content="oGefS83X7z9HKOSyNkoISOI-wqWec6fRmFhe2bhbgEU" />
+
+    
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Study Tracker 2026</title>
+
+    
+
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
-        .day-card { min-height: 70px; transition: all 0.2s; border: 1px solid #e2e8f0; border-radius: 8px; }
+
+        .day-card { min-height: 70px; transition: all 0.2s; border: 1px solid #e2e8f0; border-radius: 8px; position: relative; }
+
         .studied { background-color: #dcfce7 !important; border-color: #22c55e !important; }
+
         .missed { background-color: #fee2e2 !important; border-color: #ef4444 !important; }
+
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
-        /* Focus Mode Theme */
-        body.focus-mode { background-color: #0f172a !important; color: white !important; }
-        .focus-mode .bg-white { background-color: #1e293b !important; color: white !important; border-color: #334155 !important; }
-        .focus-mode h1, .focus-mode h2 { color: #f8fafc !important; }
+
+        button { cursor: pointer; }
+
     </style>
+
 </head>
-<body class="bg-slate-50 p-4 md:p-8 transition-colors duration-500">
+
+<body class="bg-slate-50 p-4 md:p-8">
+
+
 
     <div class="max-w-4xl mx-auto">
-        <div id="timer-box" class="bg-white p-6 rounded-2xl shadow-lg mb-8 text-center border-2 border-slate-200">
-            <h2 class="text-xl font-bold mb-4" id="timer-display">25:00</h2>
-            <button onclick="startTimer()" id="start-btn" class="bg-indigo-600 text-white px-6 py-2 rounded-full font-bold">Start Focus Session</button>
-        </div>
 
-        <div class="grid md:grid-cols-2 gap-8 mb-10">
-            <div id="stats-display" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200"></div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                <canvas id="progressChart" width="200" height="200"></canvas>
+        <header class="flex flex-col md:flex-row justify-between items-center mb-10 sticky top-0 bg-slate-50 py-4 z-20 border-b">
+
+            <div>
+
+                <h1 class="text-2xl font-black text-slate-800 uppercase tracking-tighter">Study Plan 2026</h1>
+
+                <p class="text-slate-500 text-sm">Feb 27 — Oct 20</p>
+
             </div>
-        </div>
 
-        <div id="calendar-container" class="space-y-10"></div>
+            
+
+            <div id="stats-display" class="mt-4 md:mt-0 bg-white px-6 py-3 rounded-2xl shadow-sm border border-slate-200">
+
+                </div>
+
+        </header>
+
+
+
+        <div id="calendar-container" class="space-y-10 pb-20"></div>
+
     </div>
 
+
+
     <script>
-        // --- Timer Logic ---
-        let timeLeft = 25 * 60;
-        let timerInterval;
-        const timerDisplay = document.getElementById('timer-display');
 
-        function startTimer() {
-            document.body.classList.add('focus-mode');
-            clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                timeLeft--;
-                let mins = Math.floor(timeLeft / 60);
-                let secs = timeLeft % 60;
-                timerDisplay.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    document.body.classList.remove('focus-mode');
-                    alert("Focus session complete!");
+        const startDate = new Date(2026, 1, 27); // Feb 27
+
+        const endDate = new Date(2026, 9, 20);   // Oct 20
+
+        const storageKey = 'study_tracker_data';
+
+
+
+        let studyData = JSON.parse(localStorage.getItem(storageKey)) || {};
+
+        const container = document.getElementById('calendar-container');
+
+
+
+        function initCalendar() {
+
+            let current = new Date(startDate);
+
+            let currentMonth = -1;
+
+            let monthWrapper;
+
+
+
+            while (current <= endDate) {
+
+                if (current.getMonth() !== currentMonth) {
+
+                    currentMonth = current.getMonth();
+
+                    monthWrapper = document.createElement('div');
+
+                    const monthName = current.toLocaleString('default', { month: 'long' });
+
+                    
+
+                    monthWrapper.innerHTML = `
+
+                        <h2 class="text-lg font-bold text-slate-700 mb-3">${monthName}</h2>
+
+                        <div class="calendar-grid text-[10px] font-bold text-slate-400 uppercase mb-2">
+
+                            <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div>
+
+                        </div>
+
+                        <div class="calendar-grid"></div>
+
+                    `;
+
+                    container.appendChild(monthWrapper);
+
+                    
+
+                    const grid = monthWrapper.querySelector('.calendar-grid:last-child');
+
+                    let dayOfWeek = current.getDay(); 
+
+                    let offset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+
+                    for(let i=0; i<offset; i++) grid.innerHTML += '<div></div>';
+
                 }
-            }, 1000);
+
+
+
+                const dateStr = current.toISOString().split('T')[0];
+
+                const grid = monthWrapper.querySelector('.calendar-grid:last-child');
+
+                const dayDiv = document.createElement('div');
+
+                dayDiv.id = `date-${dateStr}`;
+
+                renderDay(dayDiv, dateStr, current.getDate());
+
+                grid.appendChild(dayDiv);
+
+                
+
+                current.setDate(current.getDate() + 1);
+
+            }
+
+            updateStats();
+
         }
 
-        // --- Chart Logic ---
-        let myChart;
-        function updateChart(done, missed) {
-            const ctx = document.getElementById('progressChart').getContext('2d');
-            if (myChart) myChart.destroy();
-            myChart = new Chart(ctx, {
-                type: 'pie',
-                data: {
-                    labels: ['Learnt', 'Missed'],
-                    datasets: [{
-                        data: [done, missed],
-                        backgroundColor: ['#22c55e', '#ef4444']
-                    }]
-                }
-            });
-        }
 
-        // ... (Include your existing initCalendar and updateDay logic here)
-        
-        function updateStats() {
-            const total = Object.keys(studyData).length;
-            const done = Object.values(studyData).filter(v => v === 'done').length;
-            const missed = Object.values(studyData).filter(v => v === 'missed').length;
+
+        function renderDay(container, dateStr, dayNum) {
+
+            const status = studyData[dateStr] || 'none';
+
+            container.className = `day-card bg-white p-2 flex flex-col justify-between group ${status === 'done' ? 'studied' : status === 'missed' ? 'missed' : ''}`;
+
             
-            document.getElementById('stats-display').innerHTML = `
-                <p class="text-sm text-slate-400 font-bold uppercase">Progress Overview</p>
-                <p class="text-3xl font-black">${done} / ${done + missed} Completed</p>
-            `;
-            updateChart(done, missed);
-        }
-        
-        initCalendar();
-    </script>
-</body>
-</html>
+
+            if (status === 'none') {
+
+                container.innerHTML = `
+
+                    <span class="text-slate-400 text-xs">${dayNum}</span>
+
+                    <div class="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+
+                        <button onclick="updateDay('${dateStr}', 'done')" class="text-[9px] bg-green-500 text-white rounded py-0.5">✔ Done</button>
+
+                        <button onclick="updateDay('${dateStr}', 'missed')" class="text-[9px] bg-red-400 text-white rounded py-0.5">✘ Miss</button>
+
+                    </div>
+
+                `;
+
+            } else {
+
+                container.innerHTML = `
+
+                    <span class="text-xs font-bold text-slate-800">${dayNum}</span>
+
+                    <span class="text-[9px] font-bold uppercase tracking-wider">${status === 'done' ? 'LEARNT' :
