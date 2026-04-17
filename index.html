@@ -2,169 +2,227 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Study Schedule</title>
+<title>AI Study Planner Elite</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
 <style>
-    body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        background: #f4f6f9;
-    }
+body { font-family: Arial; margin:0; background:#f4f6fb; }
+.dark { background:#121212; color:#eee; }
 
-    header {
-        background: #4a6cf7;
-        color: white;
-        padding: 15px;
-        text-align: center;
-        font-size: 24px;
-    }
+header {
+    background:#4a6cf7;
+    color:white;
+    padding:15px;
+    text-align:center;
+    font-size:20px;
+}
 
-    #calendar {
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        gap: 10px;
-        padding: 20px;
-    }
+#controls, #stats {
+    padding:10px;
+    margin:10px;
+    background:white;
+    border-radius:8px;
+}
 
-    .day {
-        background: white;
-        border-radius: 8px;
-        padding: 10px;
-        min-height: 100px;
-        cursor: pointer;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        position: relative;
-    }
+.dark #controls, .dark #stats { background:#1e1e1e; }
 
-    .day:hover {
-        background: #e8edff;
-    }
+input, button {
+    width:100%;
+    margin-top:6px;
+    padding:8px;
+}
 
-    .date {
-        font-weight: bold;
-        margin-bottom: 5px;
-    }
+button {
+    background:#4a6cf7;
+    color:white;
+    border:none;
+    cursor:pointer;
+}
 
-    .task {
-        font-size: 12px;
-        color: #333;
-        margin-top: 5px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
+#calendar {
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:6px;
+    padding:10px;
+}
 
-    #modal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.5);
-        justify-content: center;
-        align-items: center;
-    }
+.day {
+    background:white;
+    padding:6px;
+    border-radius:6px;
+    min-height:90px;
+    font-size:11px;
+}
 
-    #modalContent {
-        background: white;
-        padding: 20px;
-        border-radius: 8px;
-        width: 300px;
-    }
+.dark .day { background:#1e1e1e; }
 
-    textarea {
-        width: 100%;
-        height: 100px;
-    }
-
-    button {
-        margin-top: 10px;
-        padding: 8px 12px;
-        border: none;
-        background: #4a6cf7;
-        color: white;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-
-    button:hover {
-        background: #3a56d4;
-    }
+.task { cursor:pointer; }
+.done { text-decoration:line-through; opacity:0.5; }
 </style>
 </head>
+
 <body>
 
-<header>📅 Study Schedule (Apr 12 – Oct 20)</header>
+<header>🚀 AI Study Planner ELITE</header>
 
-<div id="calendar"></div>
-
-<div id="modal">
-    <div id="modalContent">
-        <h3 id="modalDate"></h3>
-        <textarea id="taskInput" placeholder="Enter study tasks..."></textarea>
-        <button onclick="saveTask()">Save</button>
-        <button onclick="closeModal()">Close</button>
-    </div>
+<div id="controls">
+    <input id="subjects" placeholder="Subjects (Math,Science,English)">
+    <input id="weak" placeholder="Weak subject (optional)">
+    <input type="number" id="hours" value="4">
+    
+    <button onclick="generatePlan()">🧠 Generate AI Plan</button>
+    <button onclick="toggleDark()">🌙 Dark Mode</button>
+    <button onclick="clearData()">🗑 Reset</button>
 </div>
 
+<div id="stats"></div>
+<div id="calendar"></div>
+
 <script>
-const startDate = new Date('2026-04-12');
-const endDate = new Date('2026-10-20');
-const calendar = document.getElementById('calendar');
+const start = new Date('2026-04-12');
+const end = new Date('2026-10-20');
 
-let selectedDate = null;
+let data = JSON.parse(localStorage.getItem('eliteData')) || {};
 
-// Load saved tasks
-let tasks = JSON.parse(localStorage.getItem('studyTasks')) || {};
+function generatePlan(){
+    const subjects = document.getElementById('subjects').value.split(",");
+    const weak = document.getElementById('weak').value.trim();
+    const hours = parseInt(document.getElementById('hours').value);
 
-function generateCalendar() {
-    let current = new Date(startDate);
+    if(!subjects[0]) return alert("Enter subjects");
 
-    while (current <= endDate) {
-        const dateStr = current.toISOString().split('T')[0];
+    let weights = {};
+    subjects.forEach(s=>{
+        s=s.trim();
+        weights[s] = (s===weak)?2:1;
+    });
 
-        const dayDiv = document.createElement('div');
-        dayDiv.className = 'day';
-        dayDiv.onclick = () => openModal(dateStr);
+    let d = new Date(start);
 
-        const dateLabel = document.createElement('div');
-        dateLabel.className = 'date';
-        dateLabel.textContent = current.toDateString();
+    while(d<=end){
+        const key = d.toISOString().split('T')[0];
+        data[key]=[];
 
-        dayDiv.appendChild(dateLabel);
+        let totalWeight = Object.values(weights).reduce((a,b)=>a+b,0);
 
-        if (tasks[dateStr]) {
-            const taskPreview = document.createElement('div');
-            taskPreview.className = 'task';
-            taskPreview.textContent = tasks[dateStr];
-            dayDiv.appendChild(taskPreview);
-        }
+        subjects.forEach(sub=>{
+            sub=sub.trim();
+            let portion = Math.round((weights[sub]/totalWeight)*hours);
 
-        calendar.appendChild(dayDiv);
+            for(let i=0;i<portion;i++){
+                data[key].push({
+                    text: sub,
+                    done:false
+                });
+            }
+        });
 
-        current.setDate(current.getDate() + 1);
+        // Shuffle tasks
+        data[key].sort(()=>Math.random()-0.5);
+
+        d.setDate(d.getDate()+1);
+    }
+
+    save();
+}
+
+function render(){
+    const cal = document.getElementById('calendar');
+    cal.innerHTML="";
+
+    let weakMap = {};
+    let total=0, done=0, streak=0;
+
+    let dates = Object.keys(data).sort();
+
+    dates.forEach(date=>{
+        let allDone = true;
+
+        data[date].forEach(t=>{
+            total++;
+            if(t.done) done++;
+            else {
+                allDone=false;
+                weakMap[t.text]=(weakMap[t.text]||0)+1;
+            }
+        });
+
+        if(allDone && data[date].length>0) streak++;
+        else streak=0;
+    });
+
+    let weakest = Object.entries(weakMap)
+        .sort((a,b)=>b[1]-a[1])[0];
+
+    document.getElementById('stats').innerHTML = `
+        ✅ Progress: ${done}/${total} (${Math.round(done/total*100)||0}%)<br>
+        🔥 Streak: ${streak} days<br>
+        ⚠️ Weakest Subject: ${weakest?weakest[0]:"None"}
+    `;
+
+    let d = new Date(start);
+
+    while(d<=end){
+        const key = d.toISOString().split('T')[0];
+
+        const div = document.createElement('div');
+        div.className="day";
+
+        div.innerHTML = `<b>${d.getDate()}</b>`;
+
+        (data[key]||[]).slice(0,4).forEach((t,i)=>{
+            div.innerHTML += `
+            <div class="task ${t.done?'done':''}" 
+            onclick="toggle('${key}',${i})">
+            ${t.text}
+            </div>`;
+        });
+
+        cal.appendChild(div);
+        d.setDate(d.getDate()+1);
     }
 }
 
-function openModal(dateStr) {
-    selectedDate = dateStr;
-    document.getElementById('modal').style.display = 'flex';
-    document.getElementById('modalDate').textContent = dateStr;
-    document.getElementById('taskInput').value = tasks[dateStr] || '';
+function toggle(date,i){
+    data[date][i].done=!data[date][i].done;
+
+    // Adaptive AI: unfinished subjects get boosted
+    if(!data[date][i].done){
+        data[date][i].priority = (data[date][i].priority||1)+0.3;
+    }
+
+    save();
 }
 
-function closeModal() {
-    document.getElementById('modal').style.display = 'none';
+function save(){
+    localStorage.setItem('eliteData',JSON.stringify(data));
+    render();
 }
 
-function saveTask() {
-    const text = document.getElementById('taskInput').value;
-    tasks[selectedDate] = text;
-    localStorage.setItem('studyTasks', JSON.stringify(tasks));
-    location.reload();
+function toggleDark(){
+    document.body.classList.toggle('dark');
 }
 
-generateCalendar();
+function clearData(){
+    if(confirm("Reset everything?")){
+        localStorage.clear();
+        data={};
+        render();
+    }
+}
+
+// Reminder every hour
+setInterval(()=>{
+    if(Notification.permission==="granted"){
+        new Notification("📚 Time to study!");
+    }
+},3600000);
+
+if("Notification" in window){
+    Notification.requestPermission();
+}
+
+render();
 </script>
 
 </body>
