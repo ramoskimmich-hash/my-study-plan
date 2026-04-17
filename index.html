@@ -6,58 +6,124 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-body { font-family: Arial; margin:0; background:#f4f6fb; }
-.dark { background:#121212; color:#eee; }
+* { box-sizing: border-box; }
 
-header {
-    background:#4a6cf7;
+body {
+    margin:0;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #4a6cf7, #6c5ce7);
     color:white;
+}
+
+/* HEADER */
+header {
+    position:sticky;
+    top:0;
+    backdrop-filter: blur(10px);
+    background: rgba(255,255,255,0.1);
     padding:15px;
     text-align:center;
     font-size:20px;
+    font-weight:bold;
 }
 
-#controls, #stats {
-    padding:10px;
+/* CARDS */
+.card {
     margin:10px;
-    background:white;
-    border-radius:8px;
+    padding:15px;
+    border-radius:12px;
+    backdrop-filter: blur(15px);
+    background: rgba(255,255,255,0.15);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
 }
 
-.dark #controls, .dark #stats { background:#1e1e1e; }
-
+/* INPUTS */
 input, button {
     width:100%;
-    margin-top:6px;
-    padding:8px;
+    margin-top:8px;
+    padding:10px;
+    border:none;
+    border-radius:8px;
+    font-size:14px;
+}
+
+input {
+    background: rgba(255,255,255,0.2);
+    color:white;
+}
+
+input::placeholder {
+    color:#ddd;
 }
 
 button {
-    background:#4a6cf7;
-    color:white;
-    border:none;
+    background:white;
+    color:#4a6cf7;
+    font-weight:bold;
     cursor:pointer;
+    transition:0.2s;
 }
 
+button:hover {
+    transform:scale(1.03);
+}
+
+/* CALENDAR */
 #calendar {
     display:grid;
     grid-template-columns:repeat(7,1fr);
-    gap:6px;
+    gap:8px;
     padding:10px;
 }
 
 .day {
-    background:white;
-    padding:6px;
-    border-radius:6px;
-    min-height:90px;
-    font-size:11px;
+    background: rgba(255,255,255,0.15);
+    border-radius:10px;
+    padding:8px;
+    min-height:100px;
+    transition:0.2s;
 }
 
-.dark .day { background:#1e1e1e; }
+.day:hover {
+    transform:translateY(-3px);
+}
 
-.task { cursor:pointer; }
-.done { text-decoration:line-through; opacity:0.5; }
+/* TASKS */
+.task {
+    margin-top:5px;
+    padding:4px 6px;
+    border-radius:6px;
+    font-size:11px;
+    background: rgba(255,255,255,0.25);
+    cursor:pointer;
+    transition:0.2s;
+}
+
+.task:hover {
+    background: rgba(255,255,255,0.4);
+}
+
+.done {
+    text-decoration: line-through;
+    opacity:0.6;
+}
+
+/* STATS */
+#stats {
+    display:flex;
+    justify-content:space-around;
+    text-align:center;
+    font-size:13px;
+}
+
+.stat {
+    flex:1;
+}
+
+.big {
+    font-size:18px;
+    font-weight:bold;
+}
 </style>
 </head>
 
@@ -65,17 +131,17 @@ button {
 
 <header>🚀 AI Study Planner ELITE</header>
 
-<div id="controls">
+<div class="card">
     <input id="subjects" placeholder="Subjects (Math,Science,English)">
     <input id="weak" placeholder="Weak subject (optional)">
     <input type="number" id="hours" value="4">
-    
+
     <button onclick="generatePlan()">🧠 Generate AI Plan</button>
-    <button onclick="toggleDark()">🌙 Dark Mode</button>
     <button onclick="clearData()">🗑 Reset</button>
 </div>
 
-<div id="stats"></div>
+<div class="card" id="stats"></div>
+
 <div id="calendar"></div>
 
 <script>
@@ -117,9 +183,7 @@ function generatePlan(){
             }
         });
 
-        // Shuffle tasks
         data[key].sort(()=>Math.random()-0.5);
-
         d.setDate(d.getDate()+1);
     }
 
@@ -155,9 +219,18 @@ function render(){
         .sort((a,b)=>b[1]-a[1])[0];
 
     document.getElementById('stats').innerHTML = `
-        ✅ Progress: ${done}/${total} (${Math.round(done/total*100)||0}%)<br>
-        🔥 Streak: ${streak} days<br>
-        ⚠️ Weakest Subject: ${weakest?weakest[0]:"None"}
+        <div class="stat">
+            <div class="big">${Math.round(done/total*100)||0}%</div>
+            Progress
+        </div>
+        <div class="stat">
+            <div class="big">${streak}</div>
+            Streak 🔥
+        </div>
+        <div class="stat">
+            <div class="big">${weakest?weakest[0]:"-"}</div>
+            Weakest ⚠️
+        </div>
     `;
 
     let d = new Date(start);
@@ -185,22 +258,12 @@ function render(){
 
 function toggle(date,i){
     data[date][i].done=!data[date][i].done;
-
-    // Adaptive AI: unfinished subjects get boosted
-    if(!data[date][i].done){
-        data[date][i].priority = (data[date][i].priority||1)+0.3;
-    }
-
     save();
 }
 
 function save(){
     localStorage.setItem('eliteData',JSON.stringify(data));
     render();
-}
-
-function toggleDark(){
-    document.body.classList.toggle('dark');
 }
 
 function clearData(){
@@ -211,19 +274,12 @@ function clearData(){
     }
 }
 
-// Reminder every hour
-setInterval(()=>{
-    if(Notification.permission==="granted"){
-        new Notification("📚 Time to study!");
-    }
-},3600000);
-
-if("Notification" in window){
-    Notification.requestPermission();
-}
-
 render();
 </script>
 
 </body>
 </html>
+
+
+
+
