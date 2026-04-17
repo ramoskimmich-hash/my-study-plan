@@ -1,193 +1,193 @@
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
-
-    <meta name="google-site-verification" content="oGefS83X7z9HKOSyNkoISOI-wqWec6fRmFhe2bhbgEU" />
-
-    
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Study Tracker 2026</title>
-
-    
-
-    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
-
+    <title>Study Tracker 2026 Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
-
     <style>
-
-        .day-card { min-height: 70px; transition: all 0.2s; border: 1px solid #e2e8f0; border-radius: 8px; position: relative; }
-
+        .day-card { min-height: 75px; transition: all 0.2s; border: 1px solid #e2e8f0; border-radius: 12px; position: relative; }
         .studied { background-color: #dcfce7 !important; border-color: #22c55e !important; }
-
         .missed { background-color: #fee2e2 !important; border-color: #ef4444 !important; }
-
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
-
-        button { cursor: pointer; }
-
-    </style>
-
-</head>
-
-<body class="bg-slate-50 p-4 md:p-8">
-
-
-
-    <div class="max-w-4xl mx-auto">
-
-        <header class="flex flex-col md:flex-row justify-between items-center mb-10 sticky top-0 bg-slate-50 py-4 z-20 border-b">
-
-            <div>
-
-                <h1 class="text-2xl font-black text-slate-800 uppercase tracking-tighter">Study Plan 2026</h1>
-
-                <p class="text-slate-500 text-sm">Feb 27 — Oct 20</p>
-
-            </div>
-
-            
-
-            <div id="stats-display" class="mt-4 md:mt-0 bg-white px-6 py-3 rounded-2xl shadow-sm border border-slate-200">
-
-                </div>
-
-        </header>
-
-
-
-        <div id="calendar-container" class="space-y-10 pb-20"></div>
-
-    </div>
-
-
-
-    <script>
-
-        const startDate = new Date(2026, 1, 27); // Feb 27
-
-        const endDate = new Date(2026, 9, 20);   // Oct 20
-
-        const storageKey = 'study_tracker_data';
-
-
-
-        let studyData = JSON.parse(localStorage.getItem(storageKey)) || {};
-
-        const container = document.getElementById('calendar-container');
-
-
-
-        function initCalendar() {
-
-            let current = new Date(startDate);
-
-            let currentMonth = -1;
-
-            let monthWrapper;
-
-
-
-            while (current <= endDate) {
-
-                if (current.getMonth() !== currentMonth) {
-
-                    currentMonth = current.getMonth();
-
-                    monthWrapper = document.createElement('div');
-
-                    const monthName = current.toLocaleString('default', { month: 'long' });
-
-                    
-
-                    monthWrapper.innerHTML = `
-
-                        <h2 class="text-lg font-bold text-slate-700 mb-3">${monthName}</h2>
-
-                        <div class="calendar-grid text-[10px] font-bold text-slate-400 uppercase mb-2">
-
-                            <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div>
-
-                        </div>
-
-                        <div class="calendar-grid"></div>
-
-                    `;
-
-                    container.appendChild(monthWrapper);
-
-                    
-
-                    const grid = monthWrapper.querySelector('.calendar-grid:last-child');
-
-                    let dayOfWeek = current.getDay(); 
-
-                    let offset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-
-                    for(let i=0; i<offset; i++) grid.innerHTML += '<div></div>';
-
-                }
-
-
-
-                const dateStr = current.toISOString().split('T')[0];
-
-                const grid = monthWrapper.querySelector('.calendar-grid:last-child');
-
-                const dayDiv = document.createElement('div');
-
-                dayDiv.id = `date-${dateStr}`;
-
-                renderDay(dayDiv, dateStr, current.getDate());
-
-                grid.appendChild(dayDiv);
-
-                
-
-                current.setDate(current.getDate() + 1);
-
-            }
-
-            updateStats();
-
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+        
+        /* Focus Mode Theme */
+        .focus-mode { background-color: #0f172a !important; color: white !important; transition: 0.5s; }
+        .focus-mode .bg-white { background-color: #1e293b !important; color: white !important; border-color: #334155 !important; }
+        .focus-mode .text-slate-800 { color: #f8fafc !important; }
+        .focus-mode .month-title { color: #60a5fa !important; }
+        
+        .tab-active { border-bottom: 4px solid #3b82f6; color: #3b82f6; }
+        
+        /* Pie Chart Progress */
+        .pie-chart {
+            width: 80px; height: 80px; border-radius: 50%;
+            background: conic-gradient(#22c55e 0% 0%, #ef4444 0% 0%, #e2e8f0 0% 100%);
+            transition: background 0.5s ease;
         }
 
+        /* Timer Input Styling */
+        .timer-input {
+            background: transparent; width: 140px; text-align: center; outline: none;
+            border-bottom: 4px solid transparent; transition: border-color 0.3s;
+        }
+        .timer-input:focus { border-color: #3b82f6; }
+        
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+    </style>
+</head>
+<body class="bg-slate-50 p-4 md:p-8 transition-colors duration-500" id="body">
 
+    <div class="max-w-4xl mx-auto">
+        <header class="mb-10">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                <div>
+                    <h1 class="text-3xl font-black text-slate-800 uppercase tracking-tighter" id="title">Study Plan 2026</h1>
+                    <p class="text-slate-500 text-sm font-bold">Feb 27 — Oct 20</p>
+                </div>
+                <div id="stats-display" class="flex items-center gap-6 bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                    </div>
+            </div>
+
+            <div class="flex gap-8 border-b border-slate-200">
+                <button onclick="switchTab('calendar')" id="btn-calendar" class="pb-3 font-bold tab-active">Calendar</button>
+                <button onclick="switchTab('timer')" id="btn-timer" class="pb-3 font-bold text-slate-400">Study Timer</button>
+            </div>
+        </header>
+
+        <div id="view-calendar" class="space-y-12 pb-24"></div>
+
+        <div id="view-timer" class="hidden flex flex-col items-center justify-center py-24">
+            <div class="flex items-center text-9xl font-black mb-6">
+                <input type="number" id="input-min" value="25" class="timer-input" min="0" max="999">
+                <span class="mb-4">:</span>
+                <input type="number" id="input-sec" value="00" class="timer-input" min="0" max="59">
+            </div>
+            <p class="mb-12 text-slate-400 uppercase text-sm font-bold tracking-widest" id="timer-status">Set minutes and click start</p>
+            <div class="flex gap-6">
+                <button onclick="startTimer()" id="start-btn" class="px-12 py-5 bg-blue-600 text-white rounded-full font-bold hover:bg-blue-700 shadow-xl transition-all">Start Focus</button>
+                <button onclick="resetTimer()" class="px-12 py-5 bg-slate-200 text-slate-700 rounded-full font-bold hover:bg-slate-300 transition-all">Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const startDate = new Date(2026, 1, 27);
+        const endDate = new Date(2026, 9, 20);
+        const storageKey = 'study_tracker_2026_data';
+        let studyData = JSON.parse(localStorage.getItem(storageKey)) || {};
+        let timerInterval = null;
+        let totalSeconds = 0;
+
+        function switchTab(view) {
+            document.getElementById('view-calendar').classList.toggle('hidden', view !== 'calendar');
+            document.getElementById('view-timer').classList.toggle('hidden', view !== 'timer');
+            document.getElementById('btn-calendar').className = view === 'calendar' ? 'pb-3 font-bold tab-active' : 'pb-3 font-bold text-slate-400';
+            document.getElementById('btn-timer').className = view === 'timer' ? 'pb-3 font-bold tab-active' : 'pb-3 font-bold text-slate-400';
+        }
+
+        function startTimer() {
+            if(timerInterval) return;
+            const minIn = document.getElementById('input-min');
+            const secIn = document.getElementById('input-sec');
+            totalSeconds = (parseInt(minIn.value) * 60) + (parseInt(secIn.value) || 0);
+            if(totalSeconds <= 0) return alert("Please set a time!");
+
+            document.getElementById('body').classList.add('focus-mode');
+            minIn.disabled = secIn.disabled = true;
+            document.getElementById('start-btn').classList.add('opacity-50', 'pointer-events-none');
+
+            timerInterval = setInterval(() => {
+                totalSeconds--;
+                minIn.value = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+                secIn.value = (totalSeconds % 60).toString().padStart(2, '0');
+                if (totalSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                    alert("Time is up!");
+                    resetTimer();
+                }
+            }, 1000);
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            document.getElementById('body').classList.remove('focus-mode');
+            const minIn = document.getElementById('input-min');
+            const secIn = document.getElementById('input-sec');
+            minIn.disabled = secIn.disabled = false;
+            minIn.value = "25"; secIn.value = "00";
+            document.getElementById('start-btn').classList.remove('opacity-50', 'pointer-events-none');
+        }
+
+        function initCalendar() {
+            let current = new Date(startDate);
+            let currentMonth = -1;
+            const container = document.getElementById('view-calendar');
+            
+            while (current <= endDate) {
+                if (current.getMonth() !== currentMonth) {
+                    currentMonth = current.getMonth();
+                    const monthWrapper = document.createElement('div');
+                    monthWrapper.innerHTML = `
+                        <h2 class="text-xl font-bold text-slate-700 mb-4 month-title">${current.toLocaleString('default', { month: 'long' })}</h2>
+                        <div class="calendar-grid text-[10px] font-bold text-slate-400 uppercase mb-2 text-center">
+                            <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div>
+                        </div>
+                        <div class="calendar-grid"></div>
+                    `;
+                    container.appendChild(monthWrapper);
+                }
+                const grid = container.lastElementChild.querySelector('.calendar-grid:last-child');
+                const dateStr = current.toISOString().split('T')[0];
+                const dayDiv = document.createElement('div');
+                dayDiv.id = `date-${dateStr}`;
+                renderDay(dayDiv, dateStr, current.getDate());
+                grid.appendChild(dayDiv);
+                current.setDate(current.getDate() + 1);
+            }
+            updateStats();
+        }
 
         function renderDay(container, dateStr, dayNum) {
-
             const status = studyData[dateStr] || 'none';
+            container.className = `day-card bg-white p-3 flex flex-col justify-between group ${status === 'done' ? 'studied' : status === 'missed' ? 'missed' : ''}`;
+            container.innerHTML = status === 'none' ? `
+                <span class="text-slate-400 text-sm font-bold">${dayNum}</span>
+                <div class="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button onclick="updateDay('${dateStr}', 'done')" class="text-[10px] bg-green-500 text-white rounded py-1 font-bold">Done</button>
+                    <button onclick="updateDay('${dateStr}', 'missed')" class="text-[10px] bg-red-400 text-white rounded py-1 font-bold">Miss</button>
+                </div>
+            ` : `
+                <span class="text-sm font-black text-slate-800">${dayNum}</span>
+                <button onclick="updateDay('${dateStr}', 'none')" class="text-[10px] underline text-slate-400 opacity-0 group-hover:opacity-100">Reset</button>
+            `;
+        }
 
-            container.className = `day-card bg-white p-2 flex flex-col justify-between group ${status === 'done' ? 'studied' : status === 'missed' ? 'missed' : ''}`;
+        window.updateDay = function(dateStr, status) {
+            if (status === 'none') delete studyData[dateStr];
+            else studyData[dateStr] = status;
+            localStorage.setItem(storageKey, JSON.stringify(studyData));
+            renderDay(document.getElementById(`date-${dateStr}`), dateStr, new Date(dateStr).getDate());
+            updateStats();
+        };
 
-            
-
-            if (status === 'none') {
-
-                container.innerHTML = `
-
-                    <span class="text-slate-400 text-xs">${dayNum}</span>
-
-                    <div class="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-
-                        <button onclick="updateDay('${dateStr}', 'done')" class="text-[9px] bg-green-500 text-white rounded py-0.5">✔ Done</button>
-
-                        <button onclick="updateDay('${dateStr}', 'missed')" class="text-[9px] bg-red-400 text-white rounded py-0.5">✘ Miss</button>
-
-                    </div>
-
-                `;
-
-            } else {
-
-                container.innerHTML = `
-
-                    <span class="text-xs font-bold text-slate-800">${dayNum}</span>
-
-                    <span class="text-[9px] font-bold uppercase tracking-wider">${status === 'done' ? 'LEARNT' :
+        function updateStats() {
+            const done = Object.values(studyData).filter(v => v === 'done').length;
+            const missed = Object.values(studyData).filter(v => v === 'missed').length;
+            const logged = done + missed || 1;
+            const p = (done / logged) * 100;
+            document.getElementById('stats-display').innerHTML = `
+                <div class="pie-chart" style="background: conic-gradient(#22c55e 0% ${p}%, #ef4444 ${p}% ${p+(missed/logged*100)}%, #e2e8f0 0% 100%)"></div>
+                <div>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Success Rate</p>
+                    <p class="text-2xl font-black text-slate-800">${Math.round(p)}%</p>
+                </div>
+            `;
+        }
+        initCalendar();
+    </script>
+</body>
+</html>
