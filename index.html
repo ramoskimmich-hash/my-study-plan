@@ -10,17 +10,25 @@
         .studied { background-color: #dcfce7 !important; border-color: #22c55e !important; }
         .missed { background-color: #fee2e2 !important; border-color: #ef4444 !important; }
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
-        .focus-mode { background-color: #0f172a !important; color: white !important; transition: 0.5s; }
-        .tab-active { border-bottom: 2px solid #3b82f6; color: #3b82f6; }
         
+        /* Focus Mode Theme */
+        .focus-mode { background-color: #0f172a !important; color: white !important; transition: 0.5s; }
+        .focus-mode .bg-white { background-color: #1e293b !important; color: white !important; border-color: #334155 !important; }
+        .focus-mode .text-slate-800 { color: #f8fafc !important; }
+        .focus-mode .month-title { color: #60a5fa !important; }
+        
+        .tab-active { border-bottom: 3px solid #3b82f6; color: #3b82f6; }
+        
+        /* Pie Chart Styles */
         .pie-chart {
             width: 80px;
             height: 80px;
             border-radius: 50%;
             background: conic-gradient(#22c55e 0% 0%, #ef4444 0% 0%, #e2e8f0 0% 100%);
+            transition: background 0.5s ease;
         }
 
-        /* Styling the timer inputs to look like big text */
+        /* Timer Input Styles */
         .timer-input {
             background: transparent;
             width: 140px;
@@ -30,10 +38,10 @@
             transition: border-color 0.3s;
         }
         .timer-input:focus { border-color: #3b82f6; }
-        .focus-mode .timer-input { color: white; }
         
-        /* Remove number arrows */
-        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        /* Hide arrows on number inputs */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
     </style>
 </head>
@@ -46,13 +54,14 @@
                     <h1 class="text-2xl font-black text-slate-800 uppercase tracking-tighter" id="title">Study Plan 2026</h1>
                     <p class="text-slate-500 text-sm">Feb 27 — Oct 20</p>
                 </div>
+                
                 <div id="stats-display" class="flex items-center gap-6 bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
-                </div>
+                    </div>
             </div>
 
-            <div class="flex gap-4 border-b border-slate-200">
-                <button onclick="switchTab('calendar')" id="btn-calendar" class="pb-2 font-bold tab-active">Calendar</button>
-                <button onclick="switchTab('timer')" id="btn-timer" class="pb-2 font-bold text-slate-400">Study Timer</button>
+            <div class="flex gap-6 border-b border-slate-200">
+                <button onclick="switchTab('calendar')" id="btn-calendar" class="pb-2 font-bold tab-active transition-all">Calendar</button>
+                <button onclick="switchTab('timer')" id="btn-timer" class="pb-2 font-bold text-slate-400 hover:text-slate-600 transition-all">Study Timer</button>
             </div>
         </header>
 
@@ -61,10 +70,5 @@
         <div id="view-timer" class="hidden flex flex-col items-center justify-center py-20">
             <div class="flex items-center text-8xl font-black mb-4">
                 <input type="number" id="input-min" value="25" class="timer-input" min="0" max="999">
-                <span>:</span>
-                <input type="number" id="input-sec" value="00" class="timer-input" min="0" max="59">
-            </div>
-            <p class="mb-8 text-slate-400 uppercase text-xs font-bold tracking-widest" id="timer-status">Click numbers to set time</p>
-            
-            <div class="flex gap-4">
-                <button onclick="startTimer()" id="start-btn" class
+                <span class="mb-3">:</span>
+                <input type="number" id="input-sec" value
