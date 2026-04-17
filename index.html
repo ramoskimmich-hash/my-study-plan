@@ -6,10 +6,10 @@
     <title>Study Tracker 2026 Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .day-card { min-height: 70px; transition: all 0.2s; border: 1px solid #e2e8f0; border-radius: 8px; position: relative; }
+        .day-card { min-height: 75px; transition: all 0.2s; border: 1px solid #e2e8f0; border-radius: 12px; position: relative; }
         .studied { background-color: #dcfce7 !important; border-color: #22c55e !important; }
         .missed { background-color: #fee2e2 !important; border-color: #ef4444 !important; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
         
         /* Focus Mode Theme */
         .focus-mode { background-color: #0f172a !important; color: white !important; transition: 0.5s; }
@@ -17,7 +17,7 @@
         .focus-mode .text-slate-800 { color: #f8fafc !important; }
         .focus-mode .month-title { color: #60a5fa !important; }
         
-        .tab-active { border-bottom: 3px solid #3b82f6; color: #3b82f6; }
+        .tab-active { border-bottom: 4px solid #3b82f6; color: #3b82f6; }
         
         /* Pie Chart Styles */
         .pie-chart {
@@ -39,7 +39,6 @@
         }
         .timer-input:focus { border-color: #3b82f6; }
         
-        /* Hide arrows on number inputs */
         input::-webkit-outer-spin-button,
         input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
@@ -51,24 +50,45 @@
         <header class="mb-10">
             <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
                 <div>
-                    <h1 class="text-2xl font-black text-slate-800 uppercase tracking-tighter" id="title">Study Plan 2026</h1>
-                    <p class="text-slate-500 text-sm">Feb 27 — Oct 20</p>
+                    <h1 class="text-3xl font-black text-slate-800 uppercase tracking-tighter" id="title">Study Plan 2026</h1>
+                    <p class="text-slate-500 text-sm font-bold">Feb 27 — Oct 20</p>
                 </div>
                 
-                <div id="stats-display" class="flex items-center gap-6 bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+                <div id="stats-display" class="flex items-center gap-6 bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
                     </div>
             </div>
 
-            <div class="flex gap-6 border-b border-slate-200">
-                <button onclick="switchTab('calendar')" id="btn-calendar" class="pb-2 font-bold tab-active transition-all">Calendar</button>
-                <button onclick="switchTab('timer')" id="btn-timer" class="pb-2 font-bold text-slate-400 hover:text-slate-600 transition-all">Study Timer</button>
+            <div class="flex gap-8 border-b border-slate-200">
+                <button onclick="switchTab('calendar')" id="btn-calendar" class="pb-3 font-bold tab-active transition-all">Calendar</button>
+                <button onclick="switchTab('timer')" id="btn-timer" class="pb-3 font-bold text-slate-400 hover:text-slate-600 transition-all">Study Timer</button>
             </div>
         </header>
 
-        <div id="view-calendar" class="space-y-10 pb-20"></div>
+        <div id="view-calendar" class="space-y-12 pb-24"></div>
 
-        <div id="view-timer" class="hidden flex flex-col items-center justify-center py-20">
-            <div class="flex items-center text-8xl font-black mb-4">
+        <div id="view-timer" class="hidden flex flex-col items-center justify-center py-24">
+            <div class="flex items-center text-9xl font-black mb-6">
                 <input type="number" id="input-min" value="25" class="timer-input" min="0" max="999">
-                <span class="mb-3">:</span>
-                <input type="number" id="input-sec" value
+                <span class="mb-4">:</span>
+                <input type="number" id="input-sec" value="00" class="timer-input" min="0" max="59">
+            </div>
+            <p class="mb-12 text-slate-400 uppercase text-sm font-bold tracking-widest" id="timer-status">Adjust minutes and press start</p>
+            
+            <div class="flex gap-6">
+                <button onclick="startTimer()" id="start-btn" class="px-12 py-5 bg-blue-600 text-white rounded-full font-bold hover:bg-blue-700 shadow-xl transition-all active:scale-95">Start Focus</button>
+                <button onclick="resetTimer()" class="px-12 py-5 bg-slate-200 text-slate-700 rounded-full font-bold hover:bg-slate-300 transition-all">Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const startDate = new Date(2026, 1, 27);
+        const endDate = new Date(2026, 9, 20);
+        const storageKey = 'study_tracker_data_v2';
+        let studyData = JSON.parse(localStorage.getItem(storageKey)) || {};
+        
+        let timerInterval = null;
+        let totalSeconds = 0;
+
+        function switchTab(view) {
+            document.getElementById('view-calendar').classList.toggle('hidden', view !== 'calendar');
