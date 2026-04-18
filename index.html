@@ -1,103 +1,95 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>AI Study Planner Elite</title>
+<title>AI Study Planner ELITE v2</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-* { box-sizing: border-box; }
-
-body {
+*{box-sizing:border-box}
+body{
     margin:0;
-    font-family: 'Segoe UI', sans-serif;
-    background: linear-gradient(135deg, #4a6cf7, #6c5ce7);
+    font-family:'Segoe UI',sans-serif;
+    background:linear-gradient(135deg,#3a0ca3,#4361ee);
     color:white;
 }
-
-header {
+header{
     position:sticky;
     top:0;
-    backdrop-filter: blur(10px);
-    background: rgba(255,255,255,0.1);
+    backdrop-filter:blur(12px);
+    background:rgba(0,0,0,0.2);
     padding:15px;
     text-align:center;
-    font-size:20px;
     font-weight:bold;
 }
-
-.card {
+.card{
     margin:10px;
     padding:15px;
-    border-radius:12px;
-    backdrop-filter: blur(15px);
-    background: rgba(255,255,255,0.15);
+    border-radius:14px;
+    backdrop-filter:blur(20px);
+    background:rgba(255,255,255,0.12);
 }
-
-input, button {
+input,button{
     width:100%;
     margin-top:8px;
     padding:10px;
     border:none;
     border-radius:8px;
 }
-
-input {
-    background: rgba(255,255,255,0.2);
+input{
+    background:rgba(255,255,255,0.2);
     color:white;
 }
-
-button {
+button{
     background:white;
-    color:#4a6cf7;
+    color:#3a0ca3;
     font-weight:bold;
     cursor:pointer;
 }
-
-#calendar {
+#calendar{
     display:grid;
     grid-template-columns:repeat(7,1fr);
     gap:8px;
     padding:10px;
 }
-
-.day {
-    background: rgba(255,255,255,0.15);
+.day{
+    background:rgba(255,255,255,0.15);
     border-radius:10px;
     padding:8px;
-    min-height:100px;
+    min-height:110px;
     cursor:pointer;
 }
-
-.task {
+.task{
     margin-top:5px;
     padding:4px;
     border-radius:6px;
     font-size:11px;
-    background: rgba(255,255,255,0.25);
+    background:rgba(255,255,255,0.3);
 }
-
-.done {
-    text-decoration: line-through;
-    opacity:0.6;
+.done{
+    text-decoration:line-through;
+    opacity:0.5;
 }
-
-#stats {
+#stats{
     display:flex;
     justify-content:space-around;
     text-align:center;
 }
-
-.big {
+.big{
     font-size:18px;
     font-weight:bold;
 }
-
-#timerDisplay {
+#timerDisplay{
     font-size:30px;
     text-align:center;
 }
+.small{
+    font-size:12px;
+    opacity:0.8;
+}
 </style>
+
 </head>
 
 <body>
@@ -105,184 +97,230 @@ button {
 <header>🚀 AI Study Planner ELITE</header>
 
 <div class="card">
-    <input id="subjects" placeholder="Subjects (Math,Science,English)">
-    <input id="weak" placeholder="Weak subject (optional)">
-    <input type="number" id="hours" value="4">
+<input id="subjects" placeholder="Subjects (Math,Science,English)">
+<input id="weak" placeholder="Weak subject (optional)">
+<input type="number" id="hours" value="4">
 
-    <button onclick="generatePlan()">🧠 Generate AI Plan</button>
-    <button onclick="clearData()">🗑 Reset</button>
+<button onclick="generatePlan()">Generate Plan</button> <button onclick="exportData()">Export</button> <button onclick="importData()">Import</button> <button onclick="clearData()">Reset</button>
+
 </div>
 
 <div class="card" id="stats"></div>
 
 <div class="card">
-    <div id="timerDisplay">25:00</div>
-    <button onclick="startTimer()">▶ Start</button>
-    <button onclick="resetTimer()">⏹ Reset</button>
+<div id="timerDisplay">25:00</div>
+<button onclick="startTimer()">Start</button>
+<button onclick="resetTimer()">Reset Timer</button>
+<div class="small">Auto Pomodoro</div>
 </div>
 
 <div id="calendar"></div>
 
 <script>
-const start = new Date('2026-04-12');
-const end = new Date('2026-10-20');
+const start=new Date('2026-04-12');
+const end=new Date('2026-10-20');
 
-let data = JSON.parse(localStorage.getItem('eliteData')) || {};
+let data=JSON.parse(localStorage.getItem('eliteData'))||{};
+let timer,mode="focus",timeLeft=1500;
 
 function generatePlan(){
-    const subjects = document.getElementById('subjects').value.split(",");
-    const weak = document.getElementById('weak').value.trim();
-    const hours = parseInt(document.getElementById('hours').value);
+const subjects=document.getElementById('subjects').value.split(",");
+const weak=document.getElementById('weak').value.trim();
+const hours=parseInt(document.getElementById('hours').value);
 
-    if(!subjects[0]) return alert("Enter subjects");
+if(!subjects[0]) return alert("Enter subjects");
 
-    let weights = {};
-    subjects.forEach(s=>{
-        s=s.trim();
-        weights[s] = (s===weak)?2:1;
-    });
+let weights={};
+subjects.forEach(s=>{
+s=s.trim();
+weights[s]=(s===weak)?3:1;
+});
 
-    let d = new Date(start);
+let d=new Date(start);
 
-    while(d<=end){
-        const key = d.toISOString().split('T')[0];
+while(d<=end){
+const key=d.toISOString().split('T')[0];
+if(!data[key]) data[key]=[];
 
-        if(!data[key]) data[key]=[];
+let totalWeight=Object.values(weights).reduce((a,b)=>a+b,0);
 
-        let totalWeight = Object.values(weights).reduce((a,b)=>a+b,0);
+subjects.forEach(sub=>{
+sub=sub.trim();
+let portion=Math.round((weights[sub]/totalWeight)*hours);
 
-        subjects.forEach(sub=>{
-            sub=sub.trim();
-            let portion = Math.round((weights[sub]/totalWeight)*hours);
+for(let i=0;i<portion;i++){
+data[key].push({text:sub+" (25m)",done:false});
+}
+});
 
-            for(let i=0;i<portion;i++){
-                data[key].push({
-                    text: sub,
-                    done:false
-                });
-            }
-        });
+data[key].sort(()=>Math.random()-0.5);
+d.setDate(d.getDate()+1);
+}
 
-        d.setDate(d.getDate()+1);
-    }
-
-    save();
+save();
 }
 
 function render(){
-    const cal = document.getElementById('calendar');
-    cal.innerHTML="";
+const cal=document.getElementById('calendar');
+cal.innerHTML="";
 
-    let total=0, done=0, streak=0;
+let total=0,done=0,current=0,best=0;
 
-    let dates = Object.keys(data).sort();
+let dates=Object.keys(data).sort();
 
-    dates.forEach(date=>{
-        let allDone = true;
+dates.forEach(date=>{
+let allDone=true;
 
-        data[date].forEach(t=>{
-            total++;
-            if(t.done) done++;
-            else allDone=false;
-        });
+data[date].forEach(t=>{
+total++;
+if(t.done) done++;
+else allDone=false;
+});
 
-        if(allDone && data[date].length>0) streak++;
-        else streak=0;
-    });
+if(allDone&&data[date].length>0){
+current++;
+best=Math.max(best,current);
+}else current=0;
+});
 
-    document.getElementById('stats').innerHTML = `
-        <div>
-            <div class="big">${Math.round(done/total*100)||0}%</div>
-            Progress
-        </div>
-        <div>
-            <div class="big">${streak}</div>
-            Streak 🔥
-        </div>
-    `;
+document.getElementById('stats').innerHTML=`
+<div><div class="big">${Math.round(done/total*100)||0}%</div>Progress</div>
+<div><div class="big">${current}</div>Streak</div>
+<div><div class="big">${best}</div>Best</div>
+`;
 
-    let d = new Date(start);
+let d=new Date(start);
 
-    while(d<=end){
-        const key = d.toISOString().split('T')[0];
+while(d<=end){
+const key=d.toISOString().split('T')[0];
+const div=document.createElement('div');
+div.className="day";
+div.innerHTML=`<b>${d.getDate()}</b>`;
 
-        const div = document.createElement('div');
-        div.className="day";
+div.onclick=()=>{
+let subject=prompt("Add task:");
+if(subject){
+if(!data[key]) data[key]=[];
+data[key].push({text:subject,done:false});
+save();
+}
+};
 
-        div.innerHTML = `<b>${d.getDate()}</b>`;
+(data[key]||[]).slice(0,5).forEach((t,i)=>{
+let task=document.createElement('div');
+task.className="task "+(t.done?"done":"");
+task.innerText=t.text;
 
-        div.onclick = () => {
-            let subject = prompt("Add subject:");
-            if(subject){
-                if(!data[key]) data[key]=[];
-                data[key].push({ text: subject, done:false });
-                save();
-            }
-        };
+task.onclick=(e)=>{
+e.stopPropagation();
+t.done=!t.done;
+save();
+};
 
-        (data[key]||[]).slice(0,4).forEach((t,i)=>{
-            let task = document.createElement('div');
-            task.className = "task " + (t.done?"done":"");
-            task.innerText = t.text;
+task.ondblclick=(e)=>{
+e.stopPropagation();
+let edit=prompt("Edit:",t.text);
+if(edit!==null){
+t.text=edit;
+save();
+}
+};
 
-            task.onclick = (e)=>{
-                e.stopPropagation();
-                t.done=!t.done;
-                save();
-            };
+task.oncontextmenu=(e)=>{
+e.preventDefault();
+if(confirm("Delete?")){
+data[key].splice(i,1);
+save();
+}
+};
 
-            div.appendChild(task);
-        });
+div.appendChild(task);
+});
 
-        cal.appendChild(div);
-        d.setDate(d.getDate()+1);
-    }
+cal.appendChild(div);
+d.setDate(d.getDate()+1);
+}
 }
 
 function save(){
-    localStorage.setItem('eliteData',JSON.stringify(data));
-    render();
-}
-
-function clearData(){
-    if(confirm("Reset everything?")){
-        localStorage.clear();
-        data={};
-        render();
-    }
-}
-
-/* TIMER */
-let timer;
-let timeLeft = 1500;
-
-function updateTimer(){
-    let min = Math.floor(timeLeft/60);
-    let sec = timeLeft%60;
-    document.getElementById("timerDisplay").innerText =
-        `${min}:${sec.toString().padStart(2,'0')}`;
+localStorage.setItem('eliteData',JSON.stringify(data));
+render();
 }
 
 function startTimer(){
-    if(timer) return;
+if(timer) return;
 
-    timer = setInterval(()=>{
-        timeLeft--;
-        updateTimer();
+timer=setInterval(()=>{
+timeLeft--;
+updateTimer();
 
-        if(timeLeft<=0){
-            clearInterval(timer);
-            timer=null;
-            alert("Break time!");
-        }
-    },1000);
+if(timeLeft<=0){
+clearInterval(timer);
+timer=null;
+
+if(mode==="focus"){
+mode="break";
+timeLeft=300;
+alert("Break time");
+}else{
+mode="focus";
+timeLeft=1500;
+alert("Back to work");
+}
+
+updateTimer();
+}
+},1000);
+}
+
+function updateTimer(){
+let min=Math.floor(timeLeft/60);
+let sec=timeLeft%60;
+document.getElementById("timerDisplay").innerText=
+`${min}:${sec.toString().padStart(2,'0')} (${mode})`;
 }
 
 function resetTimer(){
-    clearInterval(timer);
-    timer=null;
-    timeLeft=1500;
-    updateTimer();
+clearInterval(timer);
+timer=null;
+mode="focus";
+timeLeft=1500;
+updateTimer();
+}
+
+function exportData(){
+const blob=new Blob([JSON.stringify(data)],{type:"application/json"});
+const a=document.createElement("a");
+a.href=URL.createObjectURL(blob);
+a.download="study-data.json";
+a.click();
+}
+
+function importData(){
+const input=document.createElement("input");
+input.type="file";
+
+input.onchange=e=>{
+const file=e.target.files[0];
+const reader=new FileReader();
+
+reader.onload=()=>{
+data=JSON.parse(reader.result);
+save();
+};
+
+reader.readAsText(file);
+};
+
+input.click();
+}
+
+function clearData(){
+if(confirm("Reset everything?")){
+localStorage.clear();
+data={};
+render();
+}
 }
 
 updateTimer();
@@ -291,7 +329,5 @@ render();
 
 </body>
 </html>
-
-
 
 
