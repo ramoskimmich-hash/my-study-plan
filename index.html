@@ -15,7 +15,6 @@ body {
     color:white;
 }
 
-/* HEADER */
 header {
     position:sticky;
     top:0;
@@ -27,24 +26,20 @@ header {
     font-weight:bold;
 }
 
-/* CARDS */
 .card {
     margin:10px;
     padding:15px;
     border-radius:12px;
     backdrop-filter: blur(15px);
     background: rgba(255,255,255,0.15);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
 }
 
-/* INPUTS */
 input, button {
     width:100%;
     margin-top:8px;
     padding:10px;
     border:none;
     border-radius:8px;
-    font-size:14px;
 }
 
 input {
@@ -52,23 +47,13 @@ input {
     color:white;
 }
 
-input::placeholder {
-    color:#ddd;
-}
-
 button {
     background:white;
     color:#4a6cf7;
     font-weight:bold;
     cursor:pointer;
-    transition:0.2s;
 }
 
-button:hover {
-    transform:scale(1.03);
-}
-
-/* CALENDAR */
 #calendar {
     display:grid;
     grid-template-columns:repeat(7,1fr);
@@ -81,26 +66,15 @@ button:hover {
     border-radius:10px;
     padding:8px;
     min-height:100px;
-    transition:0.2s;
+    cursor:pointer;
 }
 
-.day:hover {
-    transform:translateY(-3px);
-}
-
-/* TASKS */
 .task {
     margin-top:5px;
-    padding:4px 6px;
+    padding:4px;
     border-radius:6px;
     font-size:11px;
     background: rgba(255,255,255,0.25);
-    cursor:pointer;
-    transition:0.2s;
-}
-
-.task:hover {
-    background: rgba(255,255,255,0.4);
 }
 
 .done {
@@ -108,21 +82,20 @@ button:hover {
     opacity:0.6;
 }
 
-/* STATS */
 #stats {
     display:flex;
     justify-content:space-around;
     text-align:center;
-    font-size:13px;
-}
-
-.stat {
-    flex:1;
 }
 
 .big {
     font-size:18px;
     font-weight:bold;
+}
+
+#timerDisplay {
+    font-size:30px;
+    text-align:center;
 }
 </style>
 </head>
@@ -141,6 +114,12 @@ button:hover {
 </div>
 
 <div class="card" id="stats"></div>
+
+<div class="card">
+    <div id="timerDisplay">25:00</div>
+    <button onclick="startTimer()">▶ Start</button>
+    <button onclick="resetTimer()">⏹ Reset</button>
+</div>
 
 <div id="calendar"></div>
 
@@ -167,7 +146,8 @@ function generatePlan(){
 
     while(d<=end){
         const key = d.toISOString().split('T')[0];
-        data[key]=[];
+
+        if(!data[key]) data[key]=[];
 
         let totalWeight = Object.values(weights).reduce((a,b)=>a+b,0);
 
@@ -183,7 +163,6 @@ function generatePlan(){
             }
         });
 
-        data[key].sort(()=>Math.random()-0.5);
         d.setDate(d.getDate()+1);
     }
 
@@ -194,7 +173,6 @@ function render(){
     const cal = document.getElementById('calendar');
     cal.innerHTML="";
 
-    let weakMap = {};
     let total=0, done=0, streak=0;
 
     let dates = Object.keys(data).sort();
@@ -205,31 +183,21 @@ function render(){
         data[date].forEach(t=>{
             total++;
             if(t.done) done++;
-            else {
-                allDone=false;
-                weakMap[t.text]=(weakMap[t.text]||0)+1;
-            }
+            else allDone=false;
         });
 
         if(allDone && data[date].length>0) streak++;
         else streak=0;
     });
 
-    let weakest = Object.entries(weakMap)
-        .sort((a,b)=>b[1]-a[1])[0];
-
     document.getElementById('stats').innerHTML = `
-        <div class="stat">
+        <div>
             <div class="big">${Math.round(done/total*100)||0}%</div>
             Progress
         </div>
-        <div class="stat">
+        <div>
             <div class="big">${streak}</div>
             Streak 🔥
-        </div>
-        <div class="stat">
-            <div class="big">${weakest?weakest[0]:"-"}</div>
-            Weakest ⚠️
         </div>
     `;
 
@@ -243,22 +211,32 @@ function render(){
 
         div.innerHTML = `<b>${d.getDate()}</b>`;
 
+        div.onclick = () => {
+            let subject = prompt("Add subject:");
+            if(subject){
+                if(!data[key]) data[key]=[];
+                data[key].push({ text: subject, done:false });
+                save();
+            }
+        };
+
         (data[key]||[]).slice(0,4).forEach((t,i)=>{
-            div.innerHTML += `
-            <div class="task ${t.done?'done':''}" 
-            onclick="toggle('${key}',${i})">
-            ${t.text}
-            </div>`;
+            let task = document.createElement('div');
+            task.className = "task " + (t.done?"done":"");
+            task.innerText = t.text;
+
+            task.onclick = (e)=>{
+                e.stopPropagation();
+                t.done=!t.done;
+                save();
+            };
+
+            div.appendChild(task);
         });
 
         cal.appendChild(div);
         d.setDate(d.getDate()+1);
     }
-}
-
-function toggle(date,i){
-    data[date][i].done=!data[date][i].done;
-    save();
 }
 
 function save(){
@@ -274,6 +252,40 @@ function clearData(){
     }
 }
 
+/* TIMER */
+let timer;
+let timeLeft = 1500;
+
+function updateTimer(){
+    let min = Math.floor(timeLeft/60);
+    let sec = timeLeft%60;
+    document.getElementById("timerDisplay").innerText =
+        `${min}:${sec.toString().padStart(2,'0')}`;
+}
+
+function startTimer(){
+    if(timer) return;
+
+    timer = setInterval(()=>{
+        timeLeft--;
+        updateTimer();
+
+        if(timeLeft<=0){
+            clearInterval(timer);
+            timer=null;
+            alert("Break time!");
+        }
+    },1000);
+}
+
+function resetTimer(){
+    clearInterval(timer);
+    timer=null;
+    timeLeft=1500;
+    updateTimer();
+}
+
+updateTimer();
 render();
 </script>
 
