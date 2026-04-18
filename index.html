@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>AI Study Planner ELITE v2</title>
+<title>AI Study Planner ELITE v3</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
@@ -94,7 +94,7 @@ button{
 
 <body>
 
-<header>🚀 AI Study Planner ELITE</header>
+<header>🚀 AI Study Planner ELITE v3</header>
 
 <div class="card">
 <input id="subjects" placeholder="Subjects (Math,Science,English)">
@@ -110,8 +110,9 @@ button{
 <div class="card">
 <div id="timerDisplay">25:00</div>
 <button onclick="startTimer()">Start</button>
-<button onclick="resetTimer()">Reset Timer</button>
-<div class="small">Auto Pomodoro</div>
+<button onclick="pauseTimer()">Pause / Resume</button>
+<button onclick="resetTimer()">Reset</button>
+<div class="small">Focus ↔ Break auto cycle</div>
 </div>
 
 <div id="calendar"></div>
@@ -121,8 +122,14 @@ const start=new Date('2026-04-12');
 const end=new Date('2026-10-20');
 
 let data=JSON.parse(localStorage.getItem('eliteData'))||{};
-let timer,mode="focus",timeLeft=1500;
 
+/* TIMER STATE */
+let timer=null;
+let mode="focus";
+let timeLeft=1500;
+let isPaused=false;
+
+/* PLAN */
 function generatePlan(){
 const subjects=document.getElementById('subjects').value.split(",");
 const weak=document.getElementById('weak').value.trim();
@@ -160,15 +167,14 @@ d.setDate(d.getDate()+1);
 save();
 }
 
+/* RENDER */
 function render(){
 const cal=document.getElementById('calendar');
 cal.innerHTML="";
 
 let total=0,done=0,current=0,best=0;
 
-let dates=Object.keys(data).sort();
-
-dates.forEach(date=>{
+Object.keys(data).sort().forEach(date=>{
 let allDone=true;
 
 data[date].forEach(t=>{
@@ -247,10 +253,15 @@ localStorage.setItem('eliteData',JSON.stringify(data));
 render();
 }
 
+/* TIMER */
 function startTimer(){
 if(timer) return;
 
+isPaused=false;
+
 timer=setInterval(()=>{
+if(isPaused) return;
+
 timeLeft--;
 updateTimer();
 
@@ -273,11 +284,9 @@ updateTimer();
 },1000);
 }
 
-function updateTimer(){
-let min=Math.floor(timeLeft/60);
-let sec=timeLeft%60;
-document.getElementById("timerDisplay").innerText=
-`${min}:${sec.toString().padStart(2,'0')} (${mode})`;
+function pauseTimer(){
+if(!timer) return;
+isPaused=!isPaused;
 }
 
 function resetTimer(){
@@ -285,9 +294,21 @@ clearInterval(timer);
 timer=null;
 mode="focus";
 timeLeft=1500;
+isPaused=false;
 updateTimer();
 }
 
+function updateTimer(){
+let min=Math.floor(timeLeft/60);
+let sec=timeLeft%60;
+
+let status = isPaused ? "paused" : mode;
+
+document.getElementById("timerDisplay").innerText=
+`${min}:${sec.toString().padStart(2,'0')} (${status})`;
+}
+
+/* DATA */
 function exportData(){
 const blob=new Blob([JSON.stringify(data)],{type:"application/json"});
 const a=document.createElement("a");
@@ -329,5 +350,3 @@ render();
 
 </body>
 </html>
-
-
