@@ -1,351 +1,335 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>AI Study Planner ELITE v3</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Study Planner Pro Grid</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-*{box-sizing:border-box}
-body{
-    margin:0;
-    font-family:'Segoe UI',sans-serif;
-    background:linear-gradient(135deg,#3a0ca3,#4361ee);
-    color:white;
+body {
+    font-family: Arial;
+    margin: 0;
+    background: #eef2f7;
 }
-header{
-    position:sticky;
-    top:0;
-    backdrop-filter:blur(12px);
-    background:rgba(0,0,0,0.2);
-    padding:15px;
-    text-align:center;
-    font-weight:bold;
+
+header {
+    background: #1f2a44;
+    color: white;
+    padding: 15px;
+    text-align: center;
 }
-.card{
-    margin:10px;
-    padding:15px;
-    border-radius:14px;
-    backdrop-filter:blur(20px);
-    background:rgba(255,255,255,0.12);
+
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 15px;
 }
-input,button{
-    width:100%;
-    margin-top:8px;
-    padding:10px;
-    border:none;
-    border-radius:8px;
+
+/* ================= CALENDAR ================= */
+.calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    margin-top: 10px;
 }
-input{
-    background:rgba(255,255,255,0.2);
-    color:white;
+
+.day-box {
+    background: white;
+    min-height: 80px;
+    border-radius: 8px;
+    padding: 5px;
+    cursor: pointer;
+    position: relative;
+    font-size: 12px;
 }
-button{
-    background:white;
-    color:#3a0ca3;
-    font-weight:bold;
-    cursor:pointer;
+
+.day-box:hover {
+    background: #dfe8ff;
 }
-#calendar{
-    display:grid;
-    grid-template-columns:repeat(7,1fr);
-    gap:8px;
-    padding:10px;
+
+.day-number {
+    font-weight: bold;
 }
-.day{
-    background:rgba(255,255,255,0.15);
-    border-radius:10px;
-    padding:8px;
-    min-height:110px;
-    cursor:pointer;
+
+.progress-bar {
+    height: 6px;
+    background: #ddd;
+    border-radius: 5px;
+    margin-top: 5px;
 }
-.task{
-    margin-top:5px;
-    padding:4px;
-    border-radius:6px;
-    font-size:11px;
-    background:rgba(255,255,255,0.3);
+
+.progress-fill {
+    height: 6px;
+    background: #2d6cdf;
+    border-radius: 5px;
 }
-.done{
-    text-decoration:line-through;
-    opacity:0.5;
+
+/* ================= PANEL ================= */
+.panel {
+    margin-top: 15px;
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
 }
-#stats{
-    display:flex;
-    justify-content:space-around;
-    text-align:center;
+
+table {
+    width: 100%;
+    border-collapse: collapse;
 }
-.big{
-    font-size:18px;
-    font-weight:bold;
+
+td, th {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: center;
 }
-#timerDisplay{
-    font-size:30px;
-    text-align:center;
+
+button {
+    padding: 5px 10px;
+    cursor: pointer;
+    background: #2d6cdf;
+    color: white;
+    border: none;
+    border-radius: 5px;
 }
-.small{
-    font-size:12px;
-    opacity:0.8;
+
+button:hover {
+    background: #1f56b3;
+}
+
+input {
+    padding: 5px;
+}
+
+.small {
+    font-size: 12px;
+    color: gray;
 }
 </style>
-
 </head>
 
 <body>
 
-<header>🚀 AI Study Planner ELITE v3</header>
+<header>
+    <h2>Advanced Study Planner Pro (Monthly Grid + Progress Tracker)</h2>
+</header>
 
-<div class="card">
-<input id="subjects" placeholder="Subjects (Math,Science,English)">
-<input id="weak" placeholder="Weak subject (optional)">
-<input type="number" id="hours" value="4">
+<div class="container">
 
-<button onclick="generatePlan()">Generate Plan</button> <button onclick="exportData()">Export</button> <button onclick="importData()">Import</button> <button onclick="clearData()">Reset</button>
-
+<!-- ================= INPUT ================= -->
+<div class="panel">
+    <h3>Set Month</h3>
+    <input type="month" id="month">
+    <button onclick="generateMonth()">Generate Month</button>
 </div>
 
-<div class="card" id="stats"></div>
-
-<div class="card">
-<div id="timerDisplay">25:00</div>
-<button onclick="startTimer()">Start</button>
-<button onclick="pauseTimer()">Pause / Resume</button>
-<button onclick="resetTimer()">Reset</button>
-<div class="small">Focus ↔ Break auto cycle</div>
+<!-- ================= PROGRESS ================= -->
+<div class="panel">
+    <h3>Overall Progress</h3>
+    <div class="progress-bar">
+        <div id="overallProgress" class="progress-fill" style="width:0%"></div>
+    </div>
+    <div class="small" id="progressText">0%</div>
 </div>
 
-<div id="calendar"></div>
+<!-- ================= CALENDAR ================= -->
+<div class="panel">
+    <h3>Calendar</h3>
+    <div class="calendar" id="calendar"></div>
+</div>
+
+<!-- ================= TIMETABLE ================= -->
+<div class="panel">
+    <h3 id="selectedDayTitle">Select a Day</h3>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Start</th>
+                <th>End</th>
+                <th>Subject</th>
+                <th>Note</th>
+                <th>Done</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody id="timetable"></tbody>
+    </table>
+
+    <br>
+
+    <input type="time" id="startTime">
+    <input type="time" id="endTime">
+    <input type="text" id="subject" placeholder="Subject">
+    <input type="text" id="note" placeholder="Note">
+    <button onclick="addSlot()">Add Slot</button>
+</div>
+
+</div>
 
 <script>
-const start=new Date('2026-04-12');
-const end=new Date('2026-10-20');
 
-let data=JSON.parse(localStorage.getItem('eliteData'))||{};
+let selectedDay = null;
+let currentMonthDays = [];
 
-/* TIMER STATE */
-let timer=null;
-let mode="focus";
-let timeLeft=1500;
-let isPaused=false;
+/* ================= MONTH GENERATION ================= */
+function generateMonth() {
+    let input = document.getElementById("month").value;
+    if (!input) return alert("Select month");
 
-/* PLAN */
-function generatePlan(){
-const subjects=document.getElementById('subjects').value.split(",");
-const weak=document.getElementById('weak').value.trim();
-const hours=parseInt(document.getElementById('hours').value);
+    let [year, month] = input.split("-");
+    month = parseInt(month);
 
-if(!subjects[0]) return alert("Enter subjects");
+    let date = new Date(year, month - 1, 1);
+    currentMonthDays = [];
 
-let weights={};
-subjects.forEach(s=>{
-s=s.trim();
-weights[s]=(s===weak)?3:1;
-});
+    while (date.getMonth() === month - 1) {
+        currentMonthDays.push(new Date(date));
+        date.setDate(date.getDate() + 1);
+    }
 
-let d=new Date(start);
-
-while(d<=end){
-const key=d.toISOString().split('T')[0];
-if(!data[key]) data[key]=[];
-
-let totalWeight=Object.values(weights).reduce((a,b)=>a+b,0);
-
-subjects.forEach(sub=>{
-sub=sub.trim();
-let portion=Math.round((weights[sub]/totalWeight)*hours);
-
-for(let i=0;i<portion;i++){
-data[key].push({text:sub+" (25m)",done:false});
-}
-});
-
-data[key].sort(()=>Math.random()-0.5);
-d.setDate(d.getDate()+1);
+    renderCalendar();
+    updateProgress();
 }
 
-save();
+/* ================= CALENDAR RENDER ================= */
+function renderCalendar() {
+    let cal = document.getElementById("calendar");
+    cal.innerHTML = "";
+
+    currentMonthDays.forEach(day => {
+        let key = day.toDateString();
+
+        let tasks = getTasks(key);
+        let done = tasks.filter(t => t.done).length;
+        let total = tasks.length;
+        let percent = total ? (done / total) * 100 : 0;
+
+        let box = document.createElement("div");
+        box.className = "day-box";
+
+        box.innerHTML = `
+            <div class="day-number">${day.getDate()}</div>
+            <div class="small">${done}/${total}</div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width:${percent}%"></div>
+            </div>
+        `;
+
+        box.onclick = () => selectDay(key);
+
+        cal.appendChild(box);
+    });
 }
 
-/* RENDER */
-function render(){
-const cal=document.getElementById('calendar');
-cal.innerHTML="";
-
-let total=0,done=0,current=0,best=0;
-
-Object.keys(data).sort().forEach(date=>{
-let allDone=true;
-
-data[date].forEach(t=>{
-total++;
-if(t.done) done++;
-else allDone=false;
-});
-
-if(allDone&&data[date].length>0){
-current++;
-best=Math.max(best,current);
-}else current=0;
-});
-
-document.getElementById('stats').innerHTML=`
-<div><div class="big">${Math.round(done/total*100)||0}%</div>Progress</div>
-<div><div class="big">${current}</div>Streak</div>
-<div><div class="big">${best}</div>Best</div>
-`;
-
-let d=new Date(start);
-
-while(d<=end){
-const key=d.toISOString().split('T')[0];
-const div=document.createElement('div');
-div.className="day";
-div.innerHTML=`<b>${d.getDate()}</b>`;
-
-div.onclick=()=>{
-let subject=prompt("Add task:");
-if(subject){
-if(!data[key]) data[key]=[];
-data[key].push({text:subject,done:false});
-save();
-}
-};
-
-(data[key]||[]).slice(0,5).forEach((t,i)=>{
-let task=document.createElement('div');
-task.className="task "+(t.done?"done":"");
-task.innerText=t.text;
-
-task.onclick=(e)=>{
-e.stopPropagation();
-t.done=!t.done;
-save();
-};
-
-task.ondblclick=(e)=>{
-e.stopPropagation();
-let edit=prompt("Edit:",t.text);
-if(edit!==null){
-t.text=edit;
-save();
-}
-};
-
-task.oncontextmenu=(e)=>{
-e.preventDefault();
-if(confirm("Delete?")){
-data[key].splice(i,1);
-save();
-}
-};
-
-div.appendChild(task);
-});
-
-cal.appendChild(div);
-d.setDate(d.getDate()+1);
-}
+/* ================= SELECT DAY ================= */
+function selectDay(day) {
+    selectedDay = day;
+    document.getElementById("selectedDayTitle").innerText = day;
+    renderTable();
 }
 
-function save(){
-localStorage.setItem('eliteData',JSON.stringify(data));
-render();
+/* ================= STORAGE ================= */
+function getTasks(day) {
+    return JSON.parse(localStorage.getItem(day)) || [];
 }
 
-/* TIMER */
-function startTimer(){
-if(timer) return;
-
-isPaused=false;
-
-timer=setInterval(()=>{
-if(isPaused) return;
-
-timeLeft--;
-updateTimer();
-
-if(timeLeft<=0){
-clearInterval(timer);
-timer=null;
-
-if(mode==="focus"){
-mode="break";
-timeLeft=300;
-alert("Break time");
-}else{
-mode="focus";
-timeLeft=1500;
-alert("Back to work");
+function saveTasks(day, tasks) {
+    localStorage.setItem(day, JSON.stringify(tasks));
 }
 
-updateTimer();
-}
-},1000);
-}
+/* ================= ADD SLOT ================= */
+function addSlot() {
+    if (!selectedDay) return alert("Select a day first");
 
-function pauseTimer(){
-if(!timer) return;
-isPaused=!isPaused;
-}
+    let start = document.getElementById("startTime").value;
+    let end = document.getElementById("endTime").value;
+    let subject = document.getElementById("subject").value;
+    let note = document.getElementById("note").value;
 
-function resetTimer(){
-clearInterval(timer);
-timer=null;
-mode="focus";
-timeLeft=1500;
-isPaused=false;
-updateTimer();
-}
+    if (!start || !end || !subject) return alert("Fill fields");
 
-function updateTimer(){
-let min=Math.floor(timeLeft/60);
-let sec=timeLeft%60;
+    let tasks = getTasks(selectedDay);
 
-let status = isPaused ? "paused" : mode;
+    tasks.push({
+        start,
+        end,
+        subject,
+        note,
+        done: false
+    });
 
-document.getElementById("timerDisplay").innerText=
-`${min}:${sec.toString().padStart(2,'0')} (${status})`;
+    saveTasks(selectedDay, tasks);
+    renderTable();
+    renderCalendar();
+    updateProgress();
 }
 
-/* DATA */
-function exportData(){
-const blob=new Blob([JSON.stringify(data)],{type:"application/json"});
-const a=document.createElement("a");
-a.href=URL.createObjectURL(blob);
-a.download="study-data.json";
-a.click();
+/* ================= TABLE ================= */
+function renderTable() {
+    if (!selectedDay) return;
+
+    let tbody = document.getElementById("timetable");
+    tbody.innerHTML = "";
+
+    let tasks = getTasks(selectedDay);
+
+    tasks.sort((a,b) => a.start.localeCompare(b.start));
+
+    tasks.forEach((t, i) => {
+        tbody.innerHTML += `
+        <tr>
+            <td>${t.start}</td>
+            <td>${t.end}</td>
+            <td>${t.subject}</td>
+            <td>${t.note || ""}</td>
+            <td>
+                <input type="checkbox" ${t.done ? "checked" : ""} onchange="toggle(${i})">
+            </td>
+            <td>
+                <button onclick="remove(${i})">X</button>
+            </td>
+        </tr>
+        `;
+    });
 }
 
-function importData(){
-const input=document.createElement("input");
-input.type="file";
-
-input.onchange=e=>{
-const file=e.target.files[0];
-const reader=new FileReader();
-
-reader.onload=()=>{
-data=JSON.parse(reader.result);
-save();
-};
-
-reader.readAsText(file);
-};
-
-input.click();
+/* ================= ACTIONS ================= */
+function toggle(i) {
+    let tasks = getTasks(selectedDay);
+    tasks[i].done = !tasks[i].done;
+    saveTasks(selectedDay, tasks);
+    renderTable();
+    renderCalendar();
+    updateProgress();
 }
 
-function clearData(){
-if(confirm("Reset everything?")){
-localStorage.clear();
-data={};
-render();
-}
+function remove(i) {
+    let tasks = getTasks(selectedDay);
+    tasks.splice(i,1);
+    saveTasks(selectedDay, tasks);
+    renderTable();
+    renderCalendar();
+    updateProgress();
 }
 
-updateTimer();
-render();
+/* ================= PROGRESS ================= */
+function updateProgress() {
+    let all = 0;
+    let done = 0;
+
+    currentMonthDays.forEach(d => {
+        let tasks = getTasks(d.toDateString());
+        all += tasks.length;
+        done += tasks.filter(t => t.done).length;
+    });
+
+    let percent = all ? (done/all)*100 : 0;
+
+    document.getElementById("overallProgress").style.width = percent + "%";
+    document.getElementById("progressText").innerText = percent.toFixed(1) + "% completed";
+}
+
 </script>
 
 </body>
