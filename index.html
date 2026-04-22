@@ -1,406 +1,1072 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="blue" data-mode="light">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Study Planner | Ultra Pro</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    
-    <style>
-        :root {
-            --primary: #3498db;
-            --primary-light: #ebf5fb;
-            --bg-body: #f8fafc;
-            --bg-card: #ffffff;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --border: #e2e8f0;
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>StudyOS — Your Focus Command Centre</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+/* ══════════════════════════════════════════
+   TOKENS & RESET
+══════════════════════════════════════════ */
+:root {
+  --bg:        #0A0A0B;
+  --surface:   #111113;
+  --surface2:  #18181C;
+  --surface3:  #222228;
+  --border:    rgba(255,255,255,0.07);
+  --border2:   rgba(255,255,255,0.13);
+  --accent:    #F5A623;
+  --accent2:   #FF6B35;
+  --accent-dim:rgba(245,166,35,0.12);
+  --accent-glow:rgba(245,166,35,0.22);
+  --text:      #F0EEE8;
+  --text2:     #8A8880;
+  --text3:     #4A4845;
+  --success:   #3DBA7E;
+  --danger:    #E05252;
+  --radius:    16px;
+  --radius-sm: 10px;
+  --ease:      cubic-bezier(0.4,0,0.2,1);
+  --ease-spring: cubic-bezier(0.34,1.56,0.64,1);
+}
 
-        [data-theme="green"] { --primary: #10b981; --primary-light: #ecfdf5; }
-        [data-theme="purple"] { --primary: #8b5cf6; --primary-light: #f5f3ff; }
-        [data-theme="red"] { --primary: #ef4444; --primary-light: #fef2f2; }
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{font-size:16px;scroll-behavior:smooth;}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:'DM Sans',sans-serif;font-weight:400;
+  line-height:1.6;min-height:100vh;overflow-x:hidden;
+  cursor:default;
+}
 
-        [data-mode="dark"] {
-            --bg-body: #0f172a;
-            --bg-card: #1e293b;
-            --text-main: #f1f5f9;
-            --text-muted: #94a3b8;
-            --border: #334155;
-            --primary-light: rgba(52, 152, 219, 0.1);
-        }
+/* Noise texture overlay */
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  opacity:0.4;
+}
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background-color: var(--bg-body); color: var(--text-main); transition: var(--transition); line-height: 1.6; min-height: 100vh; }
+/* ══════════════════════════════════════════
+   SIDEBAR LAYOUT
+══════════════════════════════════════════ */
+.app-shell{
+  display:grid;
+  grid-template-columns:220px 1fr;
+  grid-template-rows:1fr;
+  min-height:100vh;
+  position:relative;z-index:1;
+}
 
-        /* --- NAVIGATION --- */
-        .navbar {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 1rem 5%; background: var(--bg-card);
-            border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100;
-        }
-        .logo { font-size: 1.4rem; font-weight: 800; }
-        .logo span { color: var(--primary); }
-        .nav-links { display: flex; list-style: none; gap: 0.5rem; }
-        .nav-links a { 
-            text-decoration: none; color: var(--text-muted); 
-            font-weight: 600; font-size: 0.85rem; cursor: pointer; padding: 0.5rem 0.8rem; border-radius: 8px;
-        }
-        .nav-links a.active { color: var(--primary); background: var(--primary-light); }
+/* ── SIDEBAR ── */
+.sidebar{
+  background:var(--surface);
+  border-right:1px solid var(--border);
+  padding:28px 16px;
+  display:flex;flex-direction:column;gap:8px;
+  position:sticky;top:0;height:100vh;overflow:hidden;
+}
+.sidebar-logo{
+  padding:0 10px 24px;
+  font-family:'Syne',sans-serif;font-size:1.25rem;font-weight:800;
+  letter-spacing:-0.5px;color:var(--text);
+  display:flex;align-items:center;gap:10px;
+}
+.sidebar-logo .dot{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--accent);
+  box-shadow:0 0 12px var(--accent);
+}
+.sidebar-section{
+  font-family:'DM Mono',monospace;font-size:10px;font-weight:500;
+  letter-spacing:2px;text-transform:uppercase;color:var(--text3);
+  padding:0 10px;margin:8px 0 4px;
+}
+.nav-item{
+  display:flex;align-items:center;gap:12px;
+  padding:11px 14px;border-radius:var(--radius-sm);
+  cursor:pointer;transition:all 0.2s var(--ease);
+  font-size:0.88rem;font-weight:500;color:var(--text2);
+  position:relative;user-select:none;
+  border:1px solid transparent;
+}
+.nav-item .nav-icon{font-size:16px;opacity:0.7;transition:opacity 0.2s;}
+.nav-item:hover{background:var(--surface2);color:var(--text);border-color:var(--border);}
+.nav-item:hover .nav-icon{opacity:1;}
+.nav-item.active{
+  background:var(--accent-dim);color:var(--accent);
+  border-color:rgba(245,166,35,0.25);
+  font-weight:600;
+}
+.nav-item.active .nav-icon{opacity:1;}
+.nav-item.active::before{
+  content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);
+  width:3px;height:60%;background:var(--accent);border-radius:2px;
+}
+.sidebar-footer{
+  margin-top:auto;padding:14px;
+  background:var(--surface2);border-radius:var(--radius);
+  border:1px solid var(--border);font-size:0.8rem;color:var(--text3);
+}
+.sidebar-footer strong{display:block;color:var(--text2);margin-bottom:2px;font-size:0.82rem;}
 
-        /* --- LIVELY HOME --- */
-        .hero { 
-            text-align: center; padding: 3rem 1.5rem; 
-            background: linear-gradient(135deg, var(--primary), #2c3e50);
-            color: white; border-radius: 30px; margin-bottom: 2rem;
-            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
-        }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
-        .stat-card { background: rgba(255,255,255,0.15); padding: 1.2rem; border-radius: 20px; backdrop-filter: blur(10px); }
-        .stat-val { font-size: 1.8rem; font-weight: 800; display: block; }
-        
-        .progress-container { width: 100%; background: var(--border); border-radius: 10px; height: 12px; margin: 15px 0; overflow: hidden; }
-        .progress-bar { height: 100%; background: var(--primary); width: 0%; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+/* ── MAIN CONTENT ── */
+.main{
+  background:var(--bg);
+  padding:0;overflow-y:auto;
+  position:relative;
+}
+.page-header{
+  padding:36px 40px 0;
+  display:flex;align-items:flex-end;justify-content:space-between;
+  margin-bottom:32px;
+}
+.page-header h1{
+  font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;
+  letter-spacing:-0.8px;line-height:1.1;
+}
+.page-header h1 span{color:var(--accent);}
+.page-header p{color:var(--text2);font-size:0.9rem;margin-top:4px;}
+.header-meta{text-align:right;font-family:'DM Mono',monospace;font-size:12px;color:var(--text3);}
+.header-meta strong{display:block;color:var(--text2);font-size:13px;}
 
-        /* --- LAYOUT --- */
-        main { padding: 2rem 5%; max-width: 1000px; margin: 0 auto; }
-        .tab-content { display: none; animation: slideUp 0.4s ease; }
-        .tab-content.active { display: block; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+.content-area{padding:0 40px 48px;}
 
-        .card { 
-            background: var(--bg-card); border: 1px solid var(--border);
-            padding: 2rem; border-radius: 24px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
-            margin-bottom: 2rem;
-        }
+/* ── TABS ── */
+.tab-page{display:none;animation:fadeUp 0.35s var(--ease) both;}
+.tab-page.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
 
-        .btn { 
-            background: var(--primary); color: white; border: none;
-            padding: 0.8rem 1.5rem; border-radius: 12px; font-weight: 600;
-            cursor: pointer; transition: var(--transition); font-size: 0.9rem;
-        }
-        .btn:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
+/* ── CARDS ── */
+.card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:20px;padding:28px;margin-bottom:20px;
+  transition:border-color 0.2s;
+}
+.card:hover{border-color:var(--border2);}
+.card-title{
+  font-family:'Syne',sans-serif;font-size:0.9rem;font-weight:700;
+  letter-spacing:0.5px;text-transform:uppercase;color:var(--text2);
+  margin-bottom:20px;display:flex;align-items:center;gap:8px;
+}
+.card-title .pill{
+  background:var(--accent-dim);color:var(--accent);
+  font-size:10px;padding:2px 8px;border-radius:20px;
+  font-family:'DM Mono',monospace;letter-spacing:1px;
+}
 
-        input, select { 
-            padding: 0.8rem; border-radius: 12px; border: 1px solid var(--border);
-            background: var(--bg-body); color: var(--text-main); font-size: 1rem; width: 100%;
-        }
+/* ── BUTTONS ── */
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--accent);color:#0A0A0B;
+  border:none;padding:10px 20px;border-radius:var(--radius-sm);
+  font-family:'Syne',sans-serif;font-size:0.85rem;font-weight:700;
+  cursor:pointer;transition:all 0.2s var(--ease);letter-spacing:0.3px;
+  user-select:none;
+}
+.btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px var(--accent-glow);}
+.btn:active{transform:translateY(0);}
+.btn-ghost{
+  background:transparent;color:var(--text2);
+  border:1px solid var(--border2);
+}
+.btn-ghost:hover{background:var(--surface2);color:var(--text);box-shadow:none;}
+.btn-danger{background:var(--danger);color:white;}
+.btn-danger:hover{box-shadow:0 6px 20px rgba(224,82,82,0.3);}
+.btn-sm{padding:7px 14px;font-size:0.78rem;}
 
-        /* --- TABULATED TIMETABLE --- */
-        .tt-table { width: 100%; border-collapse: separate; border-spacing: 0 10px; margin-top: 1.5rem; }
-        .tt-table tr td:first-child { 
-            font-weight: 700; color: var(--primary); width: 120px; 
-            background: var(--primary-light); border-radius: 12px 0 0 12px; padding: 1rem;
-        }
-        .tt-table tr td:last-child { 
-            background: var(--bg-card); border: 1px solid var(--border); border-left: none;
-            border-radius: 0 12px 12px 0; padding: 1rem;
-        }
+/* ── INPUTS ── */
+.field{margin-bottom:16px;}
+.field label{
+  display:block;font-family:'DM Mono',monospace;font-size:11px;
+  letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:7px;
+}
+.field input,.field select,.field textarea{
+  width:100%;background:var(--surface2);
+  border:1px solid var(--border2);border-radius:var(--radius-sm);
+  color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.9rem;
+  padding:11px 14px;outline:none;transition:border-color 0.2s,box-shadow 0.2s;
+}
+.field input:focus,.field select:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px var(--accent-dim);
+}
+.field select option{background:var(--surface2);}
 
-        /* --- CALENDAR --- */
-        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-        .day-grid { 
-            display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; 
-            margin-bottom: 2rem; background: var(--bg-body); padding: 10px; border-radius: 15px;
-        }
-        .day-cell { 
-            aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; 
-            cursor: pointer; border-radius: 8px; font-weight: 600; font-size: 0.8rem;
-            transition: var(--transition); background: var(--bg-card); border: 1px solid var(--border);
-        }
-        .day-cell.active { background: var(--primary); color: white; }
-        .day-cell.has-data { border-bottom: 3px solid var(--primary); }
+/* ═══════════════════ HOME ═══════════════════ */
+.home-hero{
+  background:linear-gradient(135deg,var(--surface) 0%,var(--surface2) 100%);
+  border:1px solid var(--border);border-radius:24px;
+  padding:48px 40px;margin-bottom:24px;
+  position:relative;overflow:hidden;
+}
+.home-hero::before{
+  content:'STUDY OS';
+  position:absolute;right:-20px;bottom:-30px;
+  font-family:'Syne',sans-serif;font-size:8rem;font-weight:800;
+  color:rgba(255,255,255,0.02);letter-spacing:-4px;line-height:1;
+  user-select:none;pointer-events:none;
+}
+.home-hero h2{
+  font-family:'Syne',sans-serif;font-size:2.8rem;font-weight:800;
+  letter-spacing:-1.5px;line-height:1.05;margin-bottom:12px;
+}
+.home-hero h2 em{font-style:normal;color:var(--accent);}
+.home-hero p{color:var(--text2);max-width:420px;font-size:1rem;margin-bottom:28px;}
+.hero-stats{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:32px;
+}
+.hero-stat{
+  background:var(--bg);border:1px solid var(--border);
+  border-radius:var(--radius);padding:18px;
+}
+.hero-stat .stat-val{
+  font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:var(--accent);
+}
+.hero-stat .stat-lbl{font-size:0.8rem;color:var(--text3);margin-top:2px;}
 
-        .focus-container { text-align: center; padding: 2rem; background: var(--primary-light); border-radius: 20px; margin-top: 1rem; }
-        .task-item { display: flex; align-items: center; gap: 12px; padding: 0.8rem; background: var(--bg-card); margin-bottom: 0.6rem; border-radius: 12px; border: 1px solid var(--border); text-align: left; }
+/* ═══════════════════ TIMETABLE ═══════════════════ */
+.tt-form-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:12px;align-items:end;margin-bottom:24px;}
+.day-block{
+  border-radius:var(--radius);overflow:hidden;
+  border:1px solid var(--border);margin-bottom:12px;
+  transition:border-color 0.2s;
+}
+.day-block:hover{border-color:var(--border2);}
+.day-header{
+  background:var(--surface2);padding:12px 18px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.day-name{
+  font-family:'Syne',sans-serif;font-size:0.8rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:1px;color:var(--text2);
+}
+.day-count{
+  font-family:'DM Mono',monospace;font-size:10px;
+  background:var(--accent-dim);color:var(--accent);
+  padding:2px 8px;border-radius:20px;
+}
+.day-slots{background:var(--surface);padding:12px 16px;min-height:52px;display:flex;flex-wrap:wrap;gap:8px;}
+.slot-chip{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--surface2);border:1px solid var(--border2);
+  border-radius:8px;padding:7px 12px;
+  font-size:0.82rem;transition:border-color 0.2s;
+}
+.slot-chip:hover{border-color:var(--border2);}
+.slot-chip strong{font-weight:600;}
+.slot-chip small{color:var(--text3);font-family:'DM Mono',monospace;font-size:10px;}
+.slot-del{
+  background:none;border:none;cursor:pointer;
+  color:var(--text3);font-size:14px;line-height:1;
+  transition:color 0.2s;padding:0 2px;
+}
+.slot-del:hover{color:var(--danger);}
+.empty-slots{color:var(--text3);font-size:0.83rem;font-style:italic;padding:6px 2px;}
 
-        .range-picker {
-            background: var(--primary-light); padding: 1rem; border-radius: 15px;
-            display: flex; gap: 10px; align-items: center; margin-bottom: 1rem;
-        }
+/* ═══════════════════ TIMER ═══════════════════ */
+.timer-wrap{
+  display:flex;flex-direction:column;align-items:center;
+  padding:40px 20px;
+}
+.timer-ring{
+  position:relative;width:240px;height:240px;margin-bottom:32px;
+}
+.timer-ring svg{transform:rotate(-90deg);}
+.timer-ring-bg{stroke:var(--surface2);fill:none;stroke-width:6;}
+.timer-ring-fill{
+  stroke:var(--accent);fill:none;stroke-width:6;stroke-linecap:round;
+  stroke-dasharray:691;stroke-dashoffset:0;
+  transition:stroke-dashoffset 1s linear, stroke 0.3s;
+  filter:drop-shadow(0 0 8px rgba(245,166,35,0.5));
+}
+.timer-inner{
+  position:absolute;inset:0;display:flex;
+  flex-direction:column;align-items:center;justify-content:center;gap:4px;
+}
+.timer-digits{
+  font-family:'Syne',sans-serif;font-size:3.2rem;font-weight:800;
+  letter-spacing:-2px;color:var(--text);line-height:1;
+}
+.timer-phase{
+  font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;
+  text-transform:uppercase;color:var(--text3);
+}
+.timer-controls{display:flex;gap:12px;}
+.timer-cfg{
+  display:grid;grid-template-columns:1fr 1fr;gap:16px;
+  margin-top:28px;width:100%;max-width:340px;
+}
+.session-dots{display:flex;gap:8px;margin-top:24px;}
+.session-dot{
+  width:10px;height:10px;border-radius:50%;
+  background:var(--surface3);transition:background 0.3s;
+}
+.session-dot.done{background:var(--accent);}
+.session-dot.active{background:var(--accent);box-shadow:0 0 8px var(--accent);}
 
-        @media (max-width: 600px) {
-            .range-picker { flex-direction: column; }
-            .hero { padding: 2rem 1rem; }
-        }
-    </style>
+/* ═══════════════════ PLANNER / CALENDAR ═══════════════════ */
+.cal-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:16px;
+}
+.cal-month{
+  font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;
+}
+.cal-weekdays{
+  display:grid;grid-template-columns:repeat(7,1fr);
+  margin-bottom:6px;
+}
+.cal-wday{
+  text-align:center;
+  font-family:'DM Mono',monospace;font-size:10px;
+  letter-spacing:1px;text-transform:uppercase;color:var(--text3);
+  padding:6px 0;
+}
+.cal-grid{
+  display:grid;grid-template-columns:repeat(7,1fr);gap:4px;
+  margin-bottom:28px;
+}
+.cal-cell{
+  aspect-ratio:1/1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:2px;
+  cursor:pointer;border-radius:var(--radius-sm);
+  font-size:0.82rem;font-weight:500;
+  transition:all 0.18s var(--ease);
+  border:1px solid transparent;position:relative;
+  background:var(--surface);color:var(--text2);
+}
+.cal-cell:hover{background:var(--surface2);color:var(--text);border-color:var(--border2);}
+.cal-cell.today{border-color:var(--accent);color:var(--accent);}
+.cal-cell.selected{background:var(--accent);color:#0A0A0B;font-weight:700;box-shadow:0 4px 16px var(--accent-glow);}
+.cal-cell.has-plan::after{
+  content:'';position:absolute;bottom:5px;
+  width:4px;height:4px;border-radius:50%;background:var(--accent);
+}
+.cal-cell.selected.has-plan::after{background:#0A0A0B;}
+.cal-cell.empty{background:transparent;border-color:transparent;cursor:default;pointer-events:none;}
+
+.plan-panel{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:20px;padding:24px;
+  display:none;animation:fadeUp 0.3s var(--ease) both;
+}
+.plan-panel.visible{display:block;}
+.plan-date-label{
+  font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:20px;
+  display:flex;align-items:center;gap:10px;
+}
+.plan-date-label .badge{
+  background:var(--accent-dim);color:var(--accent);
+  font-family:'DM Mono',monospace;font-size:11px;padding:3px 10px;border-radius:20px;
+}
+.plan-form-row{
+  display:grid;grid-template-columns:1fr 100px 120px auto;
+  gap:10px;align-items:end;margin-bottom:16px;
+}
+
+/* Subject cards in planner */
+.subject-nav{
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--surface2);border-radius:var(--radius);padding:16px 20px;
+  border:1px solid var(--border2);margin-bottom:12px;
+}
+.subject-nav h4{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;}
+.subject-nav .nav-duo{display:flex;gap:8px;}
+.task-list{list-style:none;}
+.task-row{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 0;border-bottom:1px solid var(--border);
+}
+.task-row:last-child{border-bottom:none;}
+.task-check{
+  appearance:none;width:18px;height:18px;flex-shrink:0;
+  background:var(--surface2);border:1.5px solid var(--border2);
+  border-radius:5px;cursor:pointer;transition:all 0.15s;position:relative;
+}
+.task-check:checked{background:var(--accent);border-color:var(--accent);}
+.task-check:checked::after{
+  content:'✓';position:absolute;inset:0;display:flex;
+  align-items:center;justify-content:center;
+  font-size:10px;color:#0A0A0B;font-weight:900;
+}
+.task-text{font-size:0.9rem;}
+.task-text.done{color:var(--text3);text-decoration:line-through;}
+
+/* ═══════════════════ SETTINGS ═══════════════════ */
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.setting-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 0;border-bottom:1px solid var(--border);
+}
+.setting-row:last-child{border-bottom:none;}
+.setting-label{font-size:0.9rem;font-weight:500;}
+.setting-desc{font-size:0.78rem;color:var(--text3);margin-top:2px;}
+.toggle{
+  position:relative;width:44px;height:24px;cursor:pointer;
+}
+.toggle input{opacity:0;width:0;height:0;}
+.toggle-track{
+  position:absolute;inset:0;background:var(--surface3);
+  border-radius:24px;transition:background 0.25s;border:1px solid var(--border2);
+}
+.toggle input:checked~.toggle-track{background:var(--accent);}
+.toggle-thumb{
+  position:absolute;top:3px;left:3px;width:16px;height:16px;
+  background:white;border-radius:50%;transition:transform 0.25s var(--ease-spring);
+}
+.toggle input:checked~.toggle-track~.toggle-thumb{transform:translateX(20px);}
+.swatch-row{display:flex;gap:8px;}
+.swatch{
+  width:28px;height:28px;border-radius:50%;cursor:pointer;
+  border:2px solid transparent;transition:all 0.2s;
+}
+.swatch.active,.swatch:hover{border-color:white;transform:scale(1.15);}
+
+/* ═══════════════════ RESPONSIVE ═══════════════════ */
+@media(max-width:768px){
+  .app-shell{grid-template-columns:1fr;}
+  .sidebar{
+    height:auto;position:static;
+    flex-direction:row;flex-wrap:wrap;
+    padding:12px;gap:4px;
+    border-right:none;border-bottom:1px solid var(--border);
+  }
+  .sidebar-logo{padding-bottom:0;width:100%;margin-bottom:8px;}
+  .sidebar-section{display:none;}
+  .nav-item{padding:8px 12px;font-size:0.8rem;}
+  .page-header{padding:20px 20px 0;margin-bottom:20px;}
+  .content-area{padding:0 20px 40px;}
+  .tt-form-grid{grid-template-columns:1fr 1fr;}
+  .plan-form-row{grid-template-columns:1fr 1fr;}
+  .hero-stats{grid-template-columns:1fr;}
+  .settings-grid{grid-template-columns:1fr;}
+  .home-hero h2{font-size:1.8rem;}
+}
+
+/* ═══ SCROLLBAR ═══ */
+::-webkit-scrollbar{width:6px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:10px;}
+::-webkit-scrollbar-thumb:hover{background:var(--border2);}
+
+/* ═══ NOTIFICATION TOAST ═══ */
+.toast{
+  position:fixed;bottom:28px;right:28px;z-index:999;
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:var(--radius);padding:14px 20px;
+  font-size:0.88rem;color:var(--text);
+  box-shadow:0 16px 40px rgba(0,0,0,0.4);
+  transform:translateY(20px);opacity:0;
+  transition:all 0.3s var(--ease-spring);
+  display:flex;align-items:center;gap:10px;
+  pointer-events:none;max-width:320px;
+}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast-icon{font-size:18px;}
+</style>
 </head>
 <body>
 
-    <nav class="navbar">
-        <div class="logo">Study<span>Planner</span></div>
-        <ul class="nav-links">
-            <li><a onclick="showTab('home')" id="l-home" class="active">Home</a></li>
-            <li><a onclick="showTab('timetable')" id="l-timetable">Timetable</a></li>
-            <li><a onclick="showTab('pomodoro')" id="l-pomodoro">Timer</a></li>
-            <li><a onclick="showTab('planner')" id="l-planner">AI Planner</a></li>
-            <li><a onclick="showTab('settings')" id="l-settings">Settings</a></li>
-        </ul>
-    </nav>
+<div class="app-shell">
 
-    <main>
-        <section id="home" class="tab-content active">
-            <div class="hero">
-                <h1 id="greeting">Welcome Back!</h1>
-                <p id="day-quote">"The best way to predict your future is to create it."</p>
-                <div class="stats-grid">
-                    <div class="stat-card"><span class="stat-val" id="stat-streak">0</span><span>Day Streak</span></div>
-                    <div class="stat-card"><span class="stat-val" id="stat-done">0%</span><span>Today's Progress</span></div>
-                </div>
+  <!-- ══════════ SIDEBAR ══════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="dot"></div>
+      StudyOS
+    </div>
+
+    <span class="sidebar-section">Workspace</span>
+    <div class="nav-item active" onclick="showPage('home')" id="n-home">
+      <span class="nav-icon">⌂</span> Dashboard
+    </div>
+    <div class="nav-item" onclick="showPage('timetable')" id="n-timetable">
+      <span class="nav-icon">◫</span> Timetable
+    </div>
+
+    <span class="sidebar-section">Focus</span>
+    <div class="nav-item" onclick="showPage('pomodoro')" id="n-pomodoro">
+      <span class="nav-icon">◎</span> Timer
+    </div>
+    <div class="nav-item" onclick="showPage('planner')" id="n-planner">
+      <span class="nav-icon">◈</span> AI Planner
+    </div>
+
+    <span class="sidebar-section">System</span>
+    <div class="nav-item" onclick="showPage('settings')" id="n-settings">
+      <span class="nav-icon">⚙</span> Settings
+    </div>
+
+    <div class="sidebar-footer" id="sb-clock">
+      <strong id="sb-time">00:00</strong>
+      <span id="sb-date">—</span>
+    </div>
+  </aside>
+
+  <!-- ══════════ MAIN ══════════ -->
+  <div class="main">
+
+    <!-- ── HOME ── -->
+    <div id="page-home" class="tab-page active">
+      <div class="page-header">
+        <div>
+          <h1>Good <span id="greeting-word">Evening</span>.</h1>
+          <p>Your focus command centre is ready.</p>
+        </div>
+        <div class="header-meta">
+          <strong id="hdr-date">—</strong>
+          <span id="hdr-day">—</span>
+        </div>
+      </div>
+      <div class="content-area">
+        <div class="home-hero">
+          <h2>Think deeply.<br>Work <em>precisely</em>.</h2>
+          <p>StudyOS brings your schedule, timer, and AI study planner into one focused workspace.</p>
+          <button class="btn" onclick="showPage('planner')">Open AI Planner →</button>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <div class="stat-val" id="hs-subjects">0</div>
+            <div class="stat-lbl">Subjects scheduled</div>
+          </div>
+          <div class="hero-stat">
+            <div class="stat-val" id="hs-days">0</div>
+            <div class="stat-lbl">Days with a plan</div>
+          </div>
+          <div class="hero-stat">
+            <div class="stat-val" id="hs-sessions">0</div>
+            <div class="stat-lbl">Pomodoros completed</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TIMETABLE ── -->
+    <div id="page-timetable" class="tab-page">
+      <div class="page-header">
+        <div>
+          <h1>Weekly <span>Timetable</span></h1>
+          <p>Add and manage your recurring schedule.</p>
+        </div>
+      </div>
+      <div class="content-area">
+        <div class="card">
+          <div class="card-title">Add Slot</div>
+          <div class="tt-form-grid">
+            <div class="field" style="margin:0"><label>Subject</label><input type="text" id="tt-sub" placeholder="e.g. Physics"/></div>
+            <div class="field" style="margin:0"><label>Day</label>
+              <select id="tt-day">
+                <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
+                <option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
+              </select>
+            </div>
+            <div class="field" style="margin:0"><label>Start</label><input type="time" id="tt-start"/></div>
+            <div class="field" style="margin:0"><label>End</label><input type="time" id="tt-end"/></div>
+            <div class="field" style="margin:0"><label>&nbsp;</label><button class="btn" onclick="addTT()">+ Add</button></div>
+          </div>
+        </div>
+
+        <div class="card" id="tt-schedule-card">
+          <div class="card-title">Schedule <span class="pill" id="tt-count">0 slots</span></div>
+          <div id="tt-blocks"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── POMODORO ── -->
+    <div id="page-pomodoro" class="tab-page">
+      <div class="page-header">
+        <div>
+          <h1>Focus <span>Timer</span></h1>
+          <p>Deep work in structured intervals.</p>
+        </div>
+      </div>
+      <div class="content-area">
+        <div class="card">
+          <div class="timer-wrap">
+            <div class="timer-ring">
+              <svg width="240" height="240">
+                <circle class="timer-ring-bg" cx="120" cy="120" r="110"/>
+                <circle class="timer-ring-fill" id="ring-fill" cx="120" cy="120" r="110"/>
+              </svg>
+              <div class="timer-inner">
+                <div class="timer-digits" id="tm-display">25:00</div>
+                <div class="timer-phase" id="tm-phase">FOCUS</div>
+              </div>
+            </div>
+            <div class="timer-controls">
+              <button class="btn btn-ghost btn-sm" onclick="toggleTimer()" id="tm-btn">▶ Start</button>
+              <button class="btn btn-ghost btn-sm" onclick="resetTimer()">↺ Reset</button>
+              <button class="btn btn-ghost btn-sm" onclick="skipPhase()">⏩ Skip</button>
+            </div>
+            <div class="session-dots" id="session-dots">
+              <div class="session-dot active"></div>
+              <div class="session-dot"></div>
+              <div class="session-dot"></div>
+              <div class="session-dot"></div>
+            </div>
+            <div class="timer-cfg">
+              <div class="field"><label>Work (min)</label><input type="number" id="cfg-work" value="25" min="1" max="90"/></div>
+              <div class="field"><label>Break (min)</label><input type="number" id="cfg-break" value="5" min="1" max="30"/></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PLANNER ── -->
+    <div id="page-planner" class="tab-page">
+      <div class="page-header">
+        <div>
+          <h1>AI <span>Planner</span></h1>
+          <p>Map subjects across days and months.</p>
+        </div>
+      </div>
+      <div class="content-area">
+        <div class="card">
+          <div class="cal-header">
+            <button class="btn btn-ghost btn-sm" onclick="changeMonth(-1)">← Prev</button>
+            <div class="cal-month" id="cal-label"></div>
+            <button class="btn btn-ghost btn-sm" onclick="changeMonth(1)">Next →</button>
+          </div>
+          <div class="cal-weekdays">
+            <div class="cal-wday">Su</div><div class="cal-wday">Mo</div>
+            <div class="cal-wday">Tu</div><div class="cal-wday">We</div>
+            <div class="cal-wday">Th</div><div class="cal-wday">Fr</div>
+            <div class="cal-wday">Sa</div>
+          </div>
+          <div class="cal-grid" id="cal-grid"></div>
+
+          <div class="plan-panel" id="plan-panel">
+            <div class="plan-date-label">
+              <span id="plan-date-text">—</span>
+              <span class="badge">Selected</span>
             </div>
 
-            <div class="card">
-                <h3>Today's Focus Status</h3>
-                <div class="progress-container"><div class="progress-bar" id="home-progress-bar"></div></div>
-                <p id="home-status-text" class="text-muted">No sessions completed yet. Let's get started!</p>
-                <button class="btn" onclick="showTab('planner')" style="margin-top: 1.5rem; width: 100%;">Go to My Plan</button>
+            <div class="plan-form-row">
+              <div class="field" style="margin:0"><label>Subject</label><input type="text" id="p-sub" placeholder="e.g. Mathematics"/></div>
+              <div class="field" style="margin:0"><label>Duration</label><input type="number" id="p-dur" value="1" min="1"/></div>
+              <div class="field" style="margin:0"><label>Unit</label>
+                <select id="p-unit"><option value="days">Days</option><option value="months">Months</option></select>
+              </div>
+              <div class="field" style="margin:0"><label>&nbsp;</label><button class="btn" onclick="applyPlan()">Apply →</button></div>
             </div>
-        </section>
 
-        <section id="timetable" class="tab-content">
-            <div class="card">
-                <h2>Weekly Schedule</h2>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 1.5rem;">
-                    <input type="text" id="tt-sub" placeholder="Subject">
-                    <select id="tt-day"><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option></select>
-                    <input type="time" id="tt-start">
-                    <input type="time" id="tt-end">
-                    <button class="btn" onclick="addSchedule()">Add</button>
+            <div id="plan-subjects-wrap" style="display:none;margin-top:20px;">
+              <div class="subject-nav">
+                <div>
+                  <h4 id="subj-name">—</h4>
+                  <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);margin-top:2px;" id="subj-counter">1 / 1</div>
                 </div>
-                <div style="overflow-x: auto;">
-                    <table class="tt-table"><tbody id="tt-list-tabulated"></tbody></table>
+                <div class="nav-duo">
+                  <button class="btn btn-ghost btn-sm" onclick="prevSubj()">←</button>
+                  <button class="btn btn-ghost btn-sm" onclick="nextSubj()">→</button>
                 </div>
+              </div>
+              <ul class="task-list" id="subj-tasks"></ul>
+              <div style="display:flex;gap:10px;margin-top:20px;">
+                <button class="btn btn-danger btn-sm" style="width:100%" onclick="clearDay()">✕ Clear This Day</button>
+              </div>
             </div>
-        </section>
+          </div>
+        </div>
+      </div>
+    </div>
 
-        <section id="pomodoro" class="tab-content">
-            <div class="card" style="text-align: center;">
-                <h2 id="tm-label">Focus Session</h2>
-                <div class="timer-display" id="tm-display">25:00</div>
-                <div style="display: flex; gap: 10px; justify-content: center;">
-                    <button class="btn" onclick="toggleTimer()" id="tm-start">Start</button>
-                    <button class="btn btn-outline" onclick="resetTimer()">Reset</button>
-                </div>
-                <div style="display: flex; gap: 1rem; margin-top: 2rem; max-width: 300px; margin-left: auto; margin-right: auto;">
-                    <input type="number" id="cfg-work" value="25" placeholder="Work">
-                    <input type="number" id="cfg-break" value="5" placeholder="Break">
-                </div>
+    <!-- ── SETTINGS ── -->
+    <div id="page-settings" class="tab-page">
+      <div class="page-header">
+        <div>
+          <h1>System <span>Settings</span></h1>
+          <p>Customise your StudyOS workspace.</p>
+        </div>
+      </div>
+      <div class="content-area">
+        <div class="settings-grid">
+          <div class="card">
+            <div class="card-title">Appearance</div>
+            <div class="setting-row">
+              <div><div class="setting-label">AI-generated tasks</div><div class="setting-desc">Auto-generate task steps when planning</div></div>
+              <label class="toggle"><input type="checkbox" id="set-ai" checked onchange="saveSettings()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
             </div>
-        </section>
-
-        <section id="planner" class="tab-content">
-            <div class="card">
-                <h2>AI Duration Planner</h2>
-                <div class="calendar-header">
-                    <button class="btn btn-outline" onclick="changeMonth(-1)">Prev</button>
-                    <h3 id="calendar-month-year"></h3>
-                    <button class="btn btn-outline" onclick="changeMonth(1)">Next</button>
-                </div>
-                <div class="day-grid" id="calendar-days"></div>
-
-                <div id="planner-input-area" style="display:none; border-top: 2px solid var(--border); padding-top: 2rem;">
-                    <h3 id="selected-date-label" style="margin-bottom: 1.5rem; color: var(--primary);"></h3>
-                    <div class="range-picker">
-                        <span>Subject:</span>
-                        <input type="text" id="p-sub" placeholder="e.g. Mathematics">
-                        <span>Duration:</span>
-                        <input type="number" id="p-duration" value="1" min="1" style="width: 80px;">
-                        <select id="p-unit" style="width: 120px;"><option value="days">Days</option><option value="months">Months</option></select>
-                    </div>
-                    <button class="btn" onclick="addPlanToRange()" style="width: 100%;">Apply Plan to Range</button>
-
-                    <div id="focus-mode" style="margin-top: 2rem;">
-                        <div class="focus-container">
-                            <h4 id="focus-name"></h4>
-                            <ul class="task-list" id="focus-tasks" style="list-style: none;"></ul>
-                            <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem;">
-                                <button class="btn btn-outline" onclick="prevSubject()">Prev</button>
-                                <button class="btn" onclick="nextSubject()">Next</button>
-                            </div>
-                        </div>
-                        <button class="btn" style="background:#ef4444; width:100%; margin-top:1rem;" onclick="clearDayPlan()">Clear This Day</button>
-                    </div>
-                </div>
+            <div class="setting-row">
+              <div><div class="setting-label">Sound alerts</div><div class="setting-desc">Play a beep when timer ends</div></div>
+              <label class="toggle"><input type="checkbox" id="set-sound" checked onchange="saveSettings()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
             </div>
-        </section>
-
-        <section id="settings" class="tab-content">
-            <div class="card">
-                <h2>Settings</h2>
-                <div style="display: flex; flex-direction: column; gap: 15px;">
-                    <div><span>Dark Mode </span><input type="checkbox" id="set-dark" onchange="saveSet()" style="width: auto;"></div>
-                    <div><span>AI Mode </span><input type="checkbox" id="set-ai" checked onchange="saveSet()" style="width: auto;"></div>
-                    <div style="display: flex; gap: 8px;">
-                        <div onclick="setTheme('blue')" style="background:#3498db; width:30px; height:30px; border-radius:50%; cursor:pointer;"></div>
-                        <div onclick="setTheme('green')" style="background:#10b981; width:30px; height:30px; border-radius:50%; cursor:pointer;"></div>
-                        <div onclick="setTheme('purple')" style="background:#8b5cf6; width:30px; height:30px; border-radius:50%; cursor:pointer;"></div>
-                        <div onclick="setTheme('red')" style="background:#ef4444; width:30px; height:30px; border-radius:50%; cursor:pointer;"></div>
-                    </div>
-                    <button class="btn" style="background:#ef4444;" onclick="if(confirm('Wipe data?')) {localStorage.clear(); location.reload();}">Reset Everything</button>
-                </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Accent Colour</div>
+            <div class="swatch-row" id="swatch-row">
+              <div class="swatch active" data-color="#F5A623" style="background:#F5A623" onclick="setAccent('#F5A623','#FF6B35',this)"></div>
+              <div class="swatch" data-color="#3DBA7E" style="background:#3DBA7E" onclick="setAccent('#3DBA7E','#2ECC71',this)"></div>
+              <div class="swatch" data-color="#5B9BD5" style="background:#5B9BD5" onclick="setAccent('#5B9BD5','#74B9FF',this)"></div>
+              <div class="swatch" data-color="#C678DD" style="background:#C678DD" onclick="setAccent('#C678DD','#FF79C6',this)"></div>
+              <div class="swatch" data-color="#E05252" style="background:#E05252" onclick="setAccent('#E05252','#FF6B6B',this)"></div>
             </div>
-        </section>
-    </main>
+            <div class="setting-row" style="margin-top:16px;">
+              <div><div class="setting-label">Current accent</div></div>
+              <div id="accent-preview" style="width:28px;height:28px;border-radius:8px;background:var(--accent);"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Data</div>
+            <div class="setting-row">
+              <div><div class="setting-label">Clear all plans</div><div class="setting-desc">Remove all planner data</div></div>
+              <button class="btn btn-danger btn-sm" onclick="clearAllPlans()">Clear</button>
+            </div>
+            <div class="setting-row">
+              <div><div class="setting-label">Clear timetable</div><div class="setting-desc">Remove all schedule slots</div></div>
+              <button class="btn btn-danger btn-sm" onclick="clearTT()">Clear</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">About</div>
+            <div style="font-size:0.85rem;color:var(--text3);line-height:1.8;">
+              <strong style="color:var(--text2);">StudyOS v2.0</strong><br>
+              Your personal focus command centre.<br>
+              All data stored locally in your browser.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    <audio id="beep" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
+  </div><!-- /main -->
+</div><!-- /app-shell -->
 
-    <script>
-        let state = {
-            timetable: JSON.parse(localStorage.getItem('st_tt')) || [],
-            settings: JSON.parse(localStorage.getItem('st_cfg')) || { mode: 'light', theme: 'blue', ai: true },
-            plans: JSON.parse(localStorage.getItem('st_plans_v4')) || {},
-            streak: parseInt(localStorage.getItem('st_streak')) || 0,
-            lastStreakDate: localStorage.getItem('st_streak_date') || "",
-            currentDate: new Date(),
-            selectedDateStr: null,
-            currentPlanIdx: 0
-        };
+<div class="toast" id="toast">
+  <span class="toast-icon" id="toast-icon">✓</span>
+  <span id="toast-msg">Done!</span>
+</div>
 
-        function showTab(id) {
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            document.getElementById('l-' + id).classList.add('active');
-            if(id === 'home') updateHome();
-            if(id === 'planner') renderCalendar();
-            if(id === 'timetable') renderTT();
-        }
+<audio id="beep" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 
-        /* --- HOME LOGIC --- */
-        function updateHome() {
-            const hour = new Date().getHours();
-            const greet = hour < 12 ? "Good Morning" : hour < 17 ? "Good Afternoon" : "Good Evening";
-            document.getElementById('greeting').innerText = `${greet}, Scholar!`;
-            
-            const today = new Date().toISOString().split('T')[0];
-            const plans = state.plans[today] || [];
-            
-            let total = 0, done = 0;
-            plans.forEach(p => p.tasks.forEach(t => { total++; if(t.done) done++; }));
-            
-            const perc = total > 0 ? Math.round((done/total)*100) : 0;
-            document.getElementById('stat-done').innerText = perc + "%";
-            document.getElementById('stat-streak').innerText = state.streak;
-            document.getElementById('home-progress-bar').style.width = perc + "%";
-            document.getElementById('home-status-text').innerText = total > 0 ? 
-                `You've completed ${done} of ${total} tasks planned for today.` : 
-                "No tasks scheduled for today. Rest up or plan ahead!";
-        }
+<script>
+/* ══════════════════════════════════════
+   STATE
+══════════════════════════════════════ */
+let S = {
+  timetable: JSON.parse(localStorage.getItem('sos_tt'))  || [],
+  plans:     JSON.parse(localStorage.getItem('sos_plans'))|| {},
+  settings:  JSON.parse(localStorage.getItem('sos_cfg')) || { ai:true, sound:true, accent:'#F5A623', accent2:'#FF6B35' },
+  sessions:  parseInt(localStorage.getItem('sos_sessions'))||0,
+  calDate:   new Date(),
+  selDate:   null,
+  planIdx:   0
+};
 
-        /* --- CALENDAR & PLANS --- */
-        function renderCalendar() {
-            const grid = document.getElementById('calendar-days'); grid.innerHTML = '';
-            const y = state.currentDate.getFullYear(), m = state.currentDate.getMonth();
-            document.getElementById('calendar-month-year').innerText = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(state.currentDate);
-            const days = new Date(y, m + 1, 0).getDate();
-            for (let d = 1; d <= days; d++) {
-                const ds = `${y}-${(m+1).toString().padStart(2,'0')}-${d.toString().padStart(2,'0')}`;
-                const cell = document.createElement('div');
-                cell.className = `day-cell ${state.selectedDateStr === ds ? 'active' : ''} ${state.plans[ds] ? 'has-data' : ''}`;
-                cell.innerText = d; cell.onclick = () => selectDate(ds);
-                grid.appendChild(cell);
-            }
-        }
-        function selectDate(ds) {
-            state.selectedDateStr = ds; state.currentPlanIdx = 0;
-            document.getElementById('selected-date-label').innerText = "Date: " + ds;
-            document.getElementById('planner-input-area').style.display = 'block';
-            renderCalendar(); renderDayPlan();
-        }
+/* ══════════════════════════════════════
+   INIT
+══════════════════════════════════════ */
+function init(){
+  applySettings();
+  renderTT();
+  renderCalendar();
+  updateClock();
+  setInterval(updateClock, 1000);
+  updateHomeStats();
+  const h = new Date().getHours();
+  document.getElementById('greeting-word').textContent =
+    h < 12 ? 'Morning' : h < 17 ? 'Afternoon' : 'Evening';
 
-        function addPlanToRange() {
-            const sub = document.getElementById('p-sub').value, dur = parseInt(document.getElementById('p-duration').value), unit = document.getElementById('p-unit').value;
-            if(!sub || !state.selectedDateStr) return;
-            let totalDays = unit === 'days' ? dur : dur * 30;
-            let start = new Date(state.selectedDateStr);
-            for(let i = 0; i < totalDays; i++) {
-                let curr = new Date(start); curr.setDate(start.getDate() + i);
-                let ds = curr.toISOString().split('T')[0];
-                if(!state.plans[ds]) state.plans[ds] = [];
-                state.plans[ds].push({ name: sub, tasks: state.settings.ai ? [{txt:`Study ${sub} basics`, done:false}, {txt:`Practice ${sub} problems`, done:false}] : [{txt:`Read ${sub}`, done:false}] });
-            }
-            savePlans(); renderCalendar(); renderDayPlan();
-        }
+  // Persist timer progress ring circumference
+  const r = 110;
+  const circ = 2 * Math.PI * r;
+  document.getElementById('ring-fill').style.strokeDasharray = circ;
+  document.getElementById('ring-fill').style.strokeDashoffset = 0;
+  RING_CIRC = circ;
+}
 
-        function toggleTask(idx) {
-            const today = new Date().toISOString().split('T')[0];
-            const plan = state.plans[state.selectedDateStr][state.currentPlanIdx];
-            plan.tasks[idx].done = !plan.tasks[idx].done;
-            
-            // Streak Logic: If finishing a task for the first time today
-            if(state.selectedDateStr === today && plan.tasks[idx].done && state.lastStreakDate !== today) {
-                state.streak++;
-                state.lastStreakDate = today;
-                localStorage.setItem('st_streak', state.streak);
-                localStorage.setItem('st_streak_date', today);
-            }
-            savePlans();
-        }
+/* ══════════════════════════════════════
+   NAV
+══════════════════════════════════════ */
+function showPage(id){
+  document.querySelectorAll('.tab-page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.getElementById('n-'+id).classList.add('active');
+  if(id==='planner') renderCalendar();
+  if(id==='timetable') renderTT();
+  if(id==='home') updateHomeStats();
+}
 
-        function renderDayPlan() {
-            const q = state.plans[state.selectedDateStr] || [];
-            const fv = document.getElementById('focus-mode');
-            if(q.length === 0) { fv.style.display = 'none'; return; }
-            fv.style.display = 'block';
-            const cur = q[state.currentPlanIdx];
-            document.getElementById('focus-name').innerText = `${cur.name} (${state.currentPlanIdx + 1}/${q.length})`;
-            document.getElementById('focus-tasks').innerHTML = cur.tasks.map((t, i) => `
-                <li class="task-item"><input type="checkbox" ${t.done?'checked':''} onchange="toggleTask(${i})"> <span>${t.txt}</span></li>
-            `).join('');
-        }
+/* ══════════════════════════════════════
+   CLOCK
+══════════════════════════════════════ */
+function updateClock(){
+  const now = new Date();
+  const t = now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false});
+  const d = now.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+  document.getElementById('sb-time').textContent = t;
+  document.getElementById('sb-date').textContent = d;
+  document.getElementById('hdr-date').textContent = now.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  document.getElementById('hdr-day').textContent = now.toLocaleDateString('en-US',{weekday:'long'});
+}
 
-        /* --- SETTINGS & CORE --- */
-        function applySettings() {
-            localStorage.setItem('st_cfg', JSON.stringify(state.settings));
-            document.documentElement.setAttribute('data-mode', state.settings.mode);
-            document.documentElement.setAttribute('data-theme', state.settings.theme);
-            document.getElementById('set-dark').checked = state.settings.mode === 'dark';
-        }
-        function saveSet() {
-            state.settings.mode = document.getElementById('set-dark').checked ? 'dark' : 'light';
-            state.settings.ai = document.getElementById('set-ai').checked;
-            applySettings();
-        }
-        function setTheme(c) { state.settings.theme = c; applySettings(); }
-        function savePlans() { localStorage.setItem('st_plans_v4', JSON.stringify(state.plans)); }
-        function changeMonth(dir) { state.currentDate.setMonth(state.currentDate.getMonth() + dir); renderCalendar(); }
-        function nextSubject() { if(state.currentPlanIdx < (state.plans[state.selectedDateStr]||[]).length - 1) { state.currentPlanIdx++; renderDayPlan(); } }
-        function prevSubject() { if(state.currentPlanIdx > 0) { state.currentPlanIdx--; renderDayPlan(); } }
-        function clearDayPlan() { delete state.plans[state.selectedDateStr]; savePlans(); renderCalendar(); renderDayPlan(); }
+/* ══════════════════════════════════════
+   TOAST
+══════════════════════════════════════ */
+let toastTimer;
+function toast(msg,icon='✓'){
+  clearTimeout(toastTimer);
+  document.getElementById('toast-msg').textContent = msg;
+  document.getElementById('toast-icon').textContent = icon;
+  document.getElementById('toast').classList.add('show');
+  toastTimer = setTimeout(()=>document.getElementById('toast').classList.remove('show'), 2800);
+}
 
-        /* --- TIMETABLE --- */
-        function addSchedule() {
-            const sub = document.getElementById('tt-sub').value, day = document.getElementById('tt-day').value;
-            const start = document.getElementById('tt-start').value, end = document.getElementById('tt-end').value;
-            if(!sub || !start || !end) return;
-            state.timetable.push({ id: Date.now(), sub, day, start, end });
-            localStorage.setItem('st_tt', JSON.stringify(state.timetable));
-            renderTT();
-        }
-        function renderTT() {
-            const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-            document.getElementById('tt-list-tabulated').innerHTML = days.map(day => {
-                const daySubs = state.timetable.filter(i => i.day === day);
-                return `<tr><td>${day}</td><td><div style="display:flex; gap:10px; flex-wrap:wrap;">${daySubs.map(s => `
-                    <div style="background:var(--bg-body); padding:5px 10px; border-radius:8px; font-size:0.8rem; border:1px solid var(--border)">
-                    ${s.sub} (${s.start}) <span style="color:red; cursor:pointer" onclick="delTT(${s.id})">×</span></div>`).join('') || '---'}</div></td></tr>`;
-            }).join('');
-        }
-        function delTT(id) { state.timetable = state.timetable.filter(i => i.id !== id); localStorage.setItem('st_tt', JSON.stringify(state.timetable)); renderTT(); }
+/* ══════════════════════════════════════
+   SETTINGS
+══════════════════════════════════════ */
+function applySettings(){
+  document.documentElement.style.setProperty('--accent', S.settings.accent);
+  document.documentElement.style.setProperty('--accent2', S.settings.accent2||S.settings.accent);
+  document.documentElement.style.setProperty('--accent-dim',hexAlpha(S.settings.accent,0.12));
+  document.documentElement.style.setProperty('--accent-glow',hexAlpha(S.settings.accent,0.22));
+  document.getElementById('set-ai').checked   = S.settings.ai;
+  document.getElementById('set-sound').checked= S.settings.sound;
+  // Mark swatch
+  document.querySelectorAll('.swatch').forEach(s=>{
+    s.classList.toggle('active', s.dataset.color === S.settings.accent);
+  });
+}
+function hexAlpha(hex,a){
+  const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+function saveSettings(){
+  S.settings.ai    = document.getElementById('set-ai').checked;
+  S.settings.sound = document.getElementById('set-sound').checked;
+  localStorage.setItem('sos_cfg', JSON.stringify(S.settings));
+  applySettings();
+}
+function setAccent(c,c2,el){
+  S.settings.accent = c; S.settings.accent2 = c2;
+  saveSettings();
+  document.querySelectorAll('.swatch').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+  toast('Accent colour updated','🎨');
+}
+function clearAllPlans(){ if(!confirm('Clear all plan data?'))return; S.plans={}; localStorage.setItem('sos_plans',JSON.stringify(S.plans)); renderCalendar(); toast('Plans cleared','🗑'); }
+function clearTT(){ if(!confirm('Clear timetable?'))return; S.timetable=[]; localStorage.setItem('sos_tt',JSON.stringify(S.timetable)); renderTT(); toast('Timetable cleared','🗑'); }
 
-        /* --- TIMER --- */
-        let tmr, timeLeft = 1500, isRunning = false;
-        function toggleTimer() {
-            if(isRunning) clearInterval(tmr); else tmr = setInterval(() => { if(timeLeft <= 0) { document.getElementById('beep').play(); resetTimer(); } else timeLeft--; updateTmr(); }, 1000);
-            isRunning = !isRunning; document.getElementById('tm-start').innerText = isRunning ? "Pause" : "Start";
-        }
-        function resetTimer() { clearInterval(tmr); isRunning = false; timeLeft = document.getElementById('cfg-work').value * 60; updateTmr(); }
-        function updateTmr() { const m = Math.floor(timeLeft/60), s = timeLeft%60; document.getElementById('tm-display').innerText = `${m}:${s<10?'0'+s:s}`; }
+/* ══════════════════════════════════════
+   HOME STATS
+══════════════════════════════════════ */
+function updateHomeStats(){
+  const uniqSubs = new Set(S.timetable.map(i=>i.sub));
+  document.getElementById('hs-subjects').textContent = uniqSubs.size;
+  document.getElementById('hs-days').textContent = Object.keys(S.plans).length;
+  document.getElementById('hs-sessions').textContent = S.sessions;
+}
 
-        applySettings();
-        updateHome();
-    </script>
+/* ══════════════════════════════════════
+   TIMETABLE
+══════════════════════════════════════ */
+function addTT(){
+  const sub=document.getElementById('tt-sub').value.trim();
+  const day=document.getElementById('tt-day').value;
+  const start=document.getElementById('tt-start').value;
+  const end=document.getElementById('tt-end').value;
+  if(!sub||!start||!end){toast('Fill in all fields','⚠'); return;}
+  S.timetable.push({id:Date.now(),sub,day,start,end});
+  localStorage.setItem('sos_tt',JSON.stringify(S.timetable));
+  document.getElementById('tt-sub').value='';
+  renderTT();
+  toast(`${sub} added to ${day}`,'✓');
+}
+function delTT(id){
+  S.timetable=S.timetable.filter(i=>i.id!==id);
+  localStorage.setItem('sos_tt',JSON.stringify(S.timetable));
+  renderTT();
+}
+function renderTT(){
+  const DAYS=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+  const total = S.timetable.length;
+  document.getElementById('tt-count').textContent = total+' slot'+(total!==1?'s':'');
+  document.getElementById('tt-blocks').innerHTML = DAYS.map(day=>{
+    const slots = S.timetable.filter(i=>i.day===day);
+    return `<div class="day-block">
+      <div class="day-header">
+        <span class="day-name">${day}</span>
+        <span class="day-count">${slots.length}</span>
+      </div>
+      <div class="day-slots">${
+        slots.length
+          ? slots.map(s=>`
+              <div class="slot-chip">
+                <strong>${s.sub}</strong>
+                <small>${s.start}–${s.end}</small>
+                <button class="slot-del" onclick="delTT(${s.id})">×</button>
+              </div>`).join('')
+          : '<span class="empty-slots">No classes</span>'
+      }</div>
+    </div>`;
+  }).join('');
+}
+
+/* ══════════════════════════════════════
+   TIMER
+══════════════════════════════════════ */
+let tmrInterval, tmrLeft=1500, tmrRunning=false, tmrPhase='work', tmrSession=0;
+let RING_CIRC = 691;
+
+function toggleTimer(){
+  if(tmrRunning){ clearInterval(tmrInterval); tmrRunning=false; document.getElementById('tm-btn').textContent='▶ Resume'; }
+  else {
+    tmrInterval = setInterval(()=>{
+      if(tmrLeft<=0){ endPhase(); return; }
+      tmrLeft--; updateTmrDisplay();
+    },1000);
+    tmrRunning=true; document.getElementById('tm-btn').textContent='⏸ Pause';
+  }
+}
+function endPhase(){
+  clearInterval(tmrInterval); tmrRunning=false;
+  if(S.settings.sound) document.getElementById('beep').play();
+  if(tmrPhase==='work'){
+    S.sessions++; localStorage.setItem('sos_sessions',S.sessions);
+    tmrSession=(tmrSession+1)%4;
+    tmrPhase='break';
+    tmrLeft=parseInt(document.getElementById('cfg-break').value)*60;
+    toast('Break time! You earned it 🎉','⏸');
+  } else {
+    tmrPhase='work';
+    tmrLeft=parseInt(document.getElementById('cfg-work').value)*60;
+    toast('Back to work. Stay focused 🎯','▶');
+  }
+  updateTmrDisplay();
+  renderSessionDots();
+  document.getElementById('tm-btn').textContent='▶ Start';
+}
+function skipPhase(){ clearInterval(tmrInterval); tmrRunning=false; endPhase(); }
+function resetTimer(){
+  clearInterval(tmrInterval); tmrRunning=false; tmrPhase='work'; tmrSession=0;
+  tmrLeft=parseInt(document.getElementById('cfg-work').value)*60;
+  updateTmrDisplay(); renderSessionDots();
+  document.getElementById('tm-btn').textContent='▶ Start';
+}
+function updateTmrDisplay(){
+  const m=Math.floor(tmrLeft/60),s=tmrLeft%60;
+  document.getElementById('tm-display').textContent=`${m}:${s<10?'0'+s:s}`;
+  document.getElementById('tm-phase').textContent=tmrPhase==='work'?'FOCUS':'BREAK';
+  // Ring
+  const total=(tmrPhase==='work'
+    ? parseInt(document.getElementById('cfg-work').value)
+    : parseInt(document.getElementById('cfg-break').value))*60;
+  const pct = tmrLeft/total;
+  const offset = RING_CIRC*(1-pct);
+  document.getElementById('ring-fill').style.strokeDashoffset=offset;
+  document.getElementById('ring-fill').style.stroke=tmrPhase==='work'?'var(--accent)':'var(--success)';
+}
+function renderSessionDots(){
+  const dots=document.getElementById('session-dots');
+  dots.innerHTML=[0,1,2,3].map(i=>`
+    <div class="session-dot ${i<tmrSession?'done':''} ${i===tmrSession&&tmrPhase==='work'?'active':''}"></div>
+  `).join('');
+}
+
+/* ══════════════════════════════════════
+   CALENDAR
+══════════════════════════════════════ */
+function renderCalendar(){
+  const grid=document.getElementById('cal-grid');
+  grid.innerHTML='';
+  const y=S.calDate.getFullYear(), m=S.calDate.getMonth();
+  document.getElementById('cal-label').textContent =
+    new Intl.DateTimeFormat('en-US',{month:'long',year:'numeric'}).format(S.calDate);
+  const daysInMonth=new Date(y,m+1,0).getDate();
+  const firstDay=new Date(y,m,1).getDay(); // 0=Sun
+  const today=new Date();
+  const todayStr=dateStr(today);
+
+  // blank cells
+  for(let i=0;i<firstDay;i++){
+    const e=document.createElement('div');
+    e.className='cal-cell empty'; grid.appendChild(e);
+  }
+  for(let d=1;d<=daysInMonth;d++){
+    const ds=`${y}-${(m+1).toString().padStart(2,'0')}-${d.toString().padStart(2,'0')}`;
+    const el=document.createElement('div');
+    el.className='cal-cell'
+      +(ds===todayStr?' today':'')
+      +(ds===S.selDate?' selected':'')
+      +(S.plans[ds]?' has-plan':'');
+    el.textContent=d;
+    el.onclick=()=>selectDate(ds);
+    grid.appendChild(el);
+  }
+}
+function changeMonth(dir){ S.calDate.setMonth(S.calDate.getMonth()+dir); renderCalendar(); }
+function selectDate(ds){
+  S.selDate=ds; S.planIdx=0;
+  document.getElementById('plan-date-text').textContent=
+    new Date(ds+'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+  document.getElementById('plan-panel').classList.add('visible');
+  renderCalendar(); renderPlanSubjects();
+}
+function dateStr(d){ return `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`; }
+
+/* ══════════════════════════════════════
+   PLANNER
+══════════════════════════════════════ */
+function applyPlan(){
+  const sub=document.getElementById('p-sub').value.trim();
+  const dur=parseInt(document.getElementById('p-dur').value)||1;
+  const unit=document.getElementById('p-unit').value;
+  if(!sub||!S.selDate){toast('Enter a subject name','⚠');return;}
+  const days = unit==='months' ? dur*30 : dur;
+  const start=new Date(S.selDate+'T12:00:00');
+  for(let i=0;i<days;i++){
+    const cur=new Date(start); cur.setDate(start.getDate()+i);
+    const ds=dateStr(cur);
+    if(!S.plans[ds]) S.plans[ds]=[];
+    const tasks = S.settings.ai
+      ? [{txt:`Review ${sub} notes & key concepts`,done:false},{txt:`Complete ${sub} practice problems`,done:false},{txt:`Summarise ${sub} in your own words`,done:false}]
+      : [{txt:`Study ${sub}`,done:false}];
+    S.plans[ds].push({name:sub,tasks});
+  }
+  localStorage.setItem('sos_plans',JSON.stringify(S.plans));
+  document.getElementById('p-sub').value='';
+  renderCalendar(); renderPlanSubjects();
+  toast(`${sub} planned for ${days} day${days!==1?'s':''}`, '📅');
+  updateHomeStats();
+}
+function renderPlanSubjects(){
+  const wrap=document.getElementById('plan-subjects-wrap');
+  const list=S.plans[S.selDate]||[];
+  if(!list.length){wrap.style.display='none';return;}
+  wrap.style.display='block';
+  const cur=list[S.planIdx];
+  document.getElementById('subj-name').textContent=cur.name;
+  document.getElementById('subj-counter').textContent=`${S.planIdx+1} / ${list.length}`;
+  document.getElementById('subj-tasks').innerHTML=cur.tasks.map((t,i)=>`
+    <li class="task-row">
+      <input type="checkbox" class="task-check" ${t.done?'checked':''} onchange="toggleTask(${i})"/>
+      <span class="task-text ${t.done?'done':''}">${t.txt}</span>
+    </li>`).join('');
+}
+function toggleTask(i){
+  S.plans[S.selDate][S.planIdx].tasks[i].done=!S.plans[S.selDate][S.planIdx].tasks[i].done;
+  localStorage.setItem('sos_plans',JSON.stringify(S.plans));
+  renderPlanSubjects();
+}
+function nextSubj(){ if(S.planIdx<(S.plans[S.selDate]||[]).length-1){S.planIdx++;renderPlanSubjects();} }
+function prevSubj(){ if(S.planIdx>0){S.planIdx--;renderPlanSubjects();} }
+function clearDay(){
+  if(!confirm('Clear all plans for this day?'))return;
+  delete S.plans[S.selDate];
+  localStorage.setItem('sos_plans',JSON.stringify(S.plans));
+  renderCalendar(); renderPlanSubjects();
+  toast('Day cleared','🗑');
+  updateHomeStats();
+}
+
+/* ══════════════════════════════════════
+   BOOT
+══════════════════════════════════════ */
+init();
+</script>
 </body>
 </html>
