@@ -1,336 +1,406 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="blue" data-mode="light">
 <head>
-<meta charset="UTF-8">
-<title>Study Planner Pro Grid</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Planner | Ultra Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #3498db;
+            --primary-light: #ebf5fb;
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-<style>
-body {
-    font-family: Arial;
-    margin: 0;
-    background: #eef2f7;
-}
+        [data-theme="green"] { --primary: #10b981; --primary-light: #ecfdf5; }
+        [data-theme="purple"] { --primary: #8b5cf6; --primary-light: #f5f3ff; }
+        [data-theme="red"] { --primary: #ef4444; --primary-light: #fef2f2; }
 
-header {
-    background: #1f2a44;
-    color: white;
-    padding: 15px;
-    text-align: center;
-}
+        [data-mode="dark"] {
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --primary-light: rgba(52, 152, 219, 0.1);
+        }
 
-.container {
-    max-width: 1200px;
-    margin: auto;
-    padding: 15px;
-}
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-body); color: var(--text-main); transition: var(--transition); line-height: 1.6; min-height: 100vh; }
 
-/* ================= CALENDAR ================= */
-.calendar {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 5px;
-    margin-top: 10px;
-}
+        /* --- NAVIGATION --- */
+        .navbar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1rem 5%; background: var(--bg-card);
+            border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100;
+        }
+        .logo { font-size: 1.4rem; font-weight: 800; }
+        .logo span { color: var(--primary); }
+        .nav-links { display: flex; list-style: none; gap: 0.5rem; }
+        .nav-links a { 
+            text-decoration: none; color: var(--text-muted); 
+            font-weight: 600; font-size: 0.85rem; cursor: pointer; padding: 0.5rem 0.8rem; border-radius: 8px;
+        }
+        .nav-links a.active { color: var(--primary); background: var(--primary-light); }
 
-.day-box {
-    background: white;
-    min-height: 80px;
-    border-radius: 8px;
-    padding: 5px;
-    cursor: pointer;
-    position: relative;
-    font-size: 12px;
-}
+        /* --- LIVELY HOME --- */
+        .hero { 
+            text-align: center; padding: 3rem 1.5rem; 
+            background: linear-gradient(135deg, var(--primary), #2c3e50);
+            color: white; border-radius: 30px; margin-bottom: 2rem;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+        }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+        .stat-card { background: rgba(255,255,255,0.15); padding: 1.2rem; border-radius: 20px; backdrop-filter: blur(10px); }
+        .stat-val { font-size: 1.8rem; font-weight: 800; display: block; }
+        
+        .progress-container { width: 100%; background: var(--border); border-radius: 10px; height: 12px; margin: 15px 0; overflow: hidden; }
+        .progress-bar { height: 100%; background: var(--primary); width: 0%; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
 
-.day-box:hover {
-    background: #dfe8ff;
-}
+        /* --- LAYOUT --- */
+        main { padding: 2rem 5%; max-width: 1000px; margin: 0 auto; }
+        .tab-content { display: none; animation: slideUp 0.4s ease; }
+        .tab-content.active { display: block; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
-.day-number {
-    font-weight: bold;
-}
+        .card { 
+            background: var(--bg-card); border: 1px solid var(--border);
+            padding: 2rem; border-radius: 24px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+        }
 
-.progress-bar {
-    height: 6px;
-    background: #ddd;
-    border-radius: 5px;
-    margin-top: 5px;
-}
+        .btn { 
+            background: var(--primary); color: white; border: none;
+            padding: 0.8rem 1.5rem; border-radius: 12px; font-weight: 600;
+            cursor: pointer; transition: var(--transition); font-size: 0.9rem;
+        }
+        .btn:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
 
-.progress-fill {
-    height: 6px;
-    background: #2d6cdf;
-    border-radius: 5px;
-}
+        input, select { 
+            padding: 0.8rem; border-radius: 12px; border: 1px solid var(--border);
+            background: var(--bg-body); color: var(--text-main); font-size: 1rem; width: 100%;
+        }
 
-/* ================= PANEL ================= */
-.panel {
-    margin-top: 15px;
-    background: white;
-    padding: 15px;
-    border-radius: 10px;
-}
+        /* --- TABULATED TIMETABLE --- */
+        .tt-table { width: 100%; border-collapse: separate; border-spacing: 0 10px; margin-top: 1.5rem; }
+        .tt-table tr td:first-child { 
+            font-weight: 700; color: var(--primary); width: 120px; 
+            background: var(--primary-light); border-radius: 12px 0 0 12px; padding: 1rem;
+        }
+        .tt-table tr td:last-child { 
+            background: var(--bg-card); border: 1px solid var(--border); border-left: none;
+            border-radius: 0 12px 12px 0; padding: 1rem;
+        }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
+        /* --- CALENDAR --- */
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .day-grid { 
+            display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; 
+            margin-bottom: 2rem; background: var(--bg-body); padding: 10px; border-radius: 15px;
+        }
+        .day-cell { 
+            aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; 
+            cursor: pointer; border-radius: 8px; font-weight: 600; font-size: 0.8rem;
+            transition: var(--transition); background: var(--bg-card); border: 1px solid var(--border);
+        }
+        .day-cell.active { background: var(--primary); color: white; }
+        .day-cell.has-data { border-bottom: 3px solid var(--primary); }
 
-td, th {
-    border: 1px solid #ccc;
-    padding: 8px;
-    text-align: center;
-}
+        .focus-container { text-align: center; padding: 2rem; background: var(--primary-light); border-radius: 20px; margin-top: 1rem; }
+        .task-item { display: flex; align-items: center; gap: 12px; padding: 0.8rem; background: var(--bg-card); margin-bottom: 0.6rem; border-radius: 12px; border: 1px solid var(--border); text-align: left; }
 
-button {
-    padding: 5px 10px;
-    cursor: pointer;
-    background: #2d6cdf;
-    color: white;
-    border: none;
-    border-radius: 5px;
-}
+        .range-picker {
+            background: var(--primary-light); padding: 1rem; border-radius: 15px;
+            display: flex; gap: 10px; align-items: center; margin-bottom: 1rem;
+        }
 
-button:hover {
-    background: #1f56b3;
-}
-
-input {
-    padding: 5px;
-}
-
-.small {
-    font-size: 12px;
-    color: gray;
-}
-</style>
+        @media (max-width: 600px) {
+            .range-picker { flex-direction: column; }
+            .hero { padding: 2rem 1rem; }
+        }
+    </style>
 </head>
-
 <body>
 
-<header>
-    <h2>Advanced Study Planner Pro (Monthly Grid + Progress Tracker)</h2>
-</header>
+    <nav class="navbar">
+        <div class="logo">Study<span>Planner</span></div>
+        <ul class="nav-links">
+            <li><a onclick="showTab('home')" id="l-home" class="active">Home</a></li>
+            <li><a onclick="showTab('timetable')" id="l-timetable">Timetable</a></li>
+            <li><a onclick="showTab('pomodoro')" id="l-pomodoro">Timer</a></li>
+            <li><a onclick="showTab('planner')" id="l-planner">AI Planner</a></li>
+            <li><a onclick="showTab('settings')" id="l-settings">Settings</a></li>
+        </ul>
+    </nav>
 
-<div class="container">
-
-<!-- ================= INPUT ================= -->
-<div class="panel">
-    <h3>Set Month</h3>
-    <input type="month" id="month">
-    <button onclick="generateMonth()">Generate Month</button>
-</div>
-
-<!-- ================= PROGRESS ================= -->
-<div class="panel">
-    <h3>Overall Progress</h3>
-    <div class="progress-bar">
-        <div id="overallProgress" class="progress-fill" style="width:0%"></div>
-    </div>
-    <div class="small" id="progressText">0%</div>
-</div>
-
-<!-- ================= CALENDAR ================= -->
-<div class="panel">
-    <h3>Calendar</h3>
-    <div class="calendar" id="calendar"></div>
-</div>
-
-<!-- ================= TIMETABLE ================= -->
-<div class="panel">
-    <h3 id="selectedDayTitle">Select a Day</h3>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Start</th>
-                <th>End</th>
-                <th>Subject</th>
-                <th>Note</th>
-                <th>Done</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-
-        <tbody id="timetable"></tbody>
-    </table>
-
-    <br>
-
-    <input type="time" id="startTime">
-    <input type="time" id="endTime">
-    <input type="text" id="subject" placeholder="Subject">
-    <input type="text" id="note" placeholder="Note">
-    <button onclick="addSlot()">Add Slot</button>
-</div>
-
-</div>
-
-<script>
-
-let selectedDay = null;
-let currentMonthDays = [];
-
-/* ================= MONTH GENERATION ================= */
-function generateMonth() {
-    let input = document.getElementById("month").value;
-    if (!input) return alert("Select month");
-
-    let [year, month] = input.split("-");
-    month = parseInt(month);
-
-    let date = new Date(year, month - 1, 1);
-    currentMonthDays = [];
-
-    while (date.getMonth() === month - 1) {
-        currentMonthDays.push(new Date(date));
-        date.setDate(date.getDate() + 1);
-    }
-
-    renderCalendar();
-    updateProgress();
-}
-
-/* ================= CALENDAR RENDER ================= */
-function renderCalendar() {
-    let cal = document.getElementById("calendar");
-    cal.innerHTML = "";
-
-    currentMonthDays.forEach(day => {
-        let key = day.toDateString();
-
-        let tasks = getTasks(key);
-        let done = tasks.filter(t => t.done).length;
-        let total = tasks.length;
-        let percent = total ? (done / total) * 100 : 0;
-
-        let box = document.createElement("div");
-        box.className = "day-box";
-
-        box.innerHTML = `
-            <div class="day-number">${day.getDate()}</div>
-            <div class="small">${done}/${total}</div>
-            <div class="progress-bar">
-                <div class="progress-fill" style="width:${percent}%"></div>
+    <main>
+        <section id="home" class="tab-content active">
+            <div class="hero">
+                <h1 id="greeting">Welcome Back!</h1>
+                <p id="day-quote">"The best way to predict your future is to create it."</p>
+                <div class="stats-grid">
+                    <div class="stat-card"><span class="stat-val" id="stat-streak">0</span><span>Day Streak</span></div>
+                    <div class="stat-card"><span class="stat-val" id="stat-done">0%</span><span>Today's Progress</span></div>
+                </div>
             </div>
-        `;
 
-        box.onclick = () => selectDay(key);
+            <div class="card">
+                <h3>Today's Focus Status</h3>
+                <div class="progress-container"><div class="progress-bar" id="home-progress-bar"></div></div>
+                <p id="home-status-text" class="text-muted">No sessions completed yet. Let's get started!</p>
+                <button class="btn" onclick="showTab('planner')" style="margin-top: 1.5rem; width: 100%;">Go to My Plan</button>
+            </div>
+        </section>
 
-        cal.appendChild(box);
-    });
-}
+        <section id="timetable" class="tab-content">
+            <div class="card">
+                <h2>Weekly Schedule</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 1.5rem;">
+                    <input type="text" id="tt-sub" placeholder="Subject">
+                    <select id="tt-day"><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option></select>
+                    <input type="time" id="tt-start">
+                    <input type="time" id="tt-end">
+                    <button class="btn" onclick="addSchedule()">Add</button>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table class="tt-table"><tbody id="tt-list-tabulated"></tbody></table>
+                </div>
+            </div>
+        </section>
 
-/* ================= SELECT DAY ================= */
-function selectDay(day) {
-    selectedDay = day;
-    document.getElementById("selectedDayTitle").innerText = day;
-    renderTable();
-}
+        <section id="pomodoro" class="tab-content">
+            <div class="card" style="text-align: center;">
+                <h2 id="tm-label">Focus Session</h2>
+                <div class="timer-display" id="tm-display">25:00</div>
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <button class="btn" onclick="toggleTimer()" id="tm-start">Start</button>
+                    <button class="btn btn-outline" onclick="resetTimer()">Reset</button>
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 2rem; max-width: 300px; margin-left: auto; margin-right: auto;">
+                    <input type="number" id="cfg-work" value="25" placeholder="Work">
+                    <input type="number" id="cfg-break" value="5" placeholder="Break">
+                </div>
+            </div>
+        </section>
 
-/* ================= STORAGE ================= */
-function getTasks(day) {
-    return JSON.parse(localStorage.getItem(day)) || [];
-}
+        <section id="planner" class="tab-content">
+            <div class="card">
+                <h2>AI Duration Planner</h2>
+                <div class="calendar-header">
+                    <button class="btn btn-outline" onclick="changeMonth(-1)">Prev</button>
+                    <h3 id="calendar-month-year"></h3>
+                    <button class="btn btn-outline" onclick="changeMonth(1)">Next</button>
+                </div>
+                <div class="day-grid" id="calendar-days"></div>
 
-function saveTasks(day, tasks) {
-    localStorage.setItem(day, JSON.stringify(tasks));
-}
+                <div id="planner-input-area" style="display:none; border-top: 2px solid var(--border); padding-top: 2rem;">
+                    <h3 id="selected-date-label" style="margin-bottom: 1.5rem; color: var(--primary);"></h3>
+                    <div class="range-picker">
+                        <span>Subject:</span>
+                        <input type="text" id="p-sub" placeholder="e.g. Mathematics">
+                        <span>Duration:</span>
+                        <input type="number" id="p-duration" value="1" min="1" style="width: 80px;">
+                        <select id="p-unit" style="width: 120px;"><option value="days">Days</option><option value="months">Months</option></select>
+                    </div>
+                    <button class="btn" onclick="addPlanToRange()" style="width: 100%;">Apply Plan to Range</button>
 
-/* ================= ADD SLOT ================= */
-function addSlot() {
-    if (!selectedDay) return alert("Select a day first");
+                    <div id="focus-mode" style="margin-top: 2rem;">
+                        <div class="focus-container">
+                            <h4 id="focus-name"></h4>
+                            <ul class="task-list" id="focus-tasks" style="list-style: none;"></ul>
+                            <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem;">
+                                <button class="btn btn-outline" onclick="prevSubject()">Prev</button>
+                                <button class="btn" onclick="nextSubject()">Next</button>
+                            </div>
+                        </div>
+                        <button class="btn" style="background:#ef4444; width:100%; margin-top:1rem;" onclick="clearDayPlan()">Clear This Day</button>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-    let start = document.getElementById("startTime").value;
-    let end = document.getElementById("endTime").value;
-    let subject = document.getElementById("subject").value;
-    let note = document.getElementById("note").value;
+        <section id="settings" class="tab-content">
+            <div class="card">
+                <h2>Settings</h2>
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <div><span>Dark Mode </span><input type="checkbox" id="set-dark" onchange="saveSet()" style="width: auto;"></div>
+                    <div><span>AI Mode </span><input type="checkbox" id="set-ai" checked onchange="saveSet()" style="width: auto;"></div>
+                    <div style="display: flex; gap: 8px;">
+                        <div onclick="setTheme('blue')" style="background:#3498db; width:30px; height:30px; border-radius:50%; cursor:pointer;"></div>
+                        <div onclick="setTheme('green')" style="background:#10b981; width:30px; height:30px; border-radius:50%; cursor:pointer;"></div>
+                        <div onclick="setTheme('purple')" style="background:#8b5cf6; width:30px; height:30px; border-radius:50%; cursor:pointer;"></div>
+                        <div onclick="setTheme('red')" style="background:#ef4444; width:30px; height:30px; border-radius:50%; cursor:pointer;"></div>
+                    </div>
+                    <button class="btn" style="background:#ef4444;" onclick="if(confirm('Wipe data?')) {localStorage.clear(); location.reload();}">Reset Everything</button>
+                </div>
+            </div>
+        </section>
+    </main>
 
-    if (!start || !end || !subject) return alert("Fill fields");
+    <audio id="beep" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
 
-    let tasks = getTasks(selectedDay);
+    <script>
+        let state = {
+            timetable: JSON.parse(localStorage.getItem('st_tt')) || [],
+            settings: JSON.parse(localStorage.getItem('st_cfg')) || { mode: 'light', theme: 'blue', ai: true },
+            plans: JSON.parse(localStorage.getItem('st_plans_v4')) || {},
+            streak: parseInt(localStorage.getItem('st_streak')) || 0,
+            lastStreakDate: localStorage.getItem('st_streak_date') || "",
+            currentDate: new Date(),
+            selectedDateStr: null,
+            currentPlanIdx: 0
+        };
 
-    tasks.push({
-        start,
-        end,
-        subject,
-        note,
-        done: false
-    });
+        function showTab(id) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.getElementById('l-' + id).classList.add('active');
+            if(id === 'home') updateHome();
+            if(id === 'planner') renderCalendar();
+            if(id === 'timetable') renderTT();
+        }
 
-    saveTasks(selectedDay, tasks);
-    renderTable();
-    renderCalendar();
-    updateProgress();
-}
+        /* --- HOME LOGIC --- */
+        function updateHome() {
+            const hour = new Date().getHours();
+            const greet = hour < 12 ? "Good Morning" : hour < 17 ? "Good Afternoon" : "Good Evening";
+            document.getElementById('greeting').innerText = `${greet}, Scholar!`;
+            
+            const today = new Date().toISOString().split('T')[0];
+            const plans = state.plans[today] || [];
+            
+            let total = 0, done = 0;
+            plans.forEach(p => p.tasks.forEach(t => { total++; if(t.done) done++; }));
+            
+            const perc = total > 0 ? Math.round((done/total)*100) : 0;
+            document.getElementById('stat-done').innerText = perc + "%";
+            document.getElementById('stat-streak').innerText = state.streak;
+            document.getElementById('home-progress-bar').style.width = perc + "%";
+            document.getElementById('home-status-text').innerText = total > 0 ? 
+                `You've completed ${done} of ${total} tasks planned for today.` : 
+                "No tasks scheduled for today. Rest up or plan ahead!";
+        }
 
-/* ================= TABLE ================= */
-function renderTable() {
-    if (!selectedDay) return;
+        /* --- CALENDAR & PLANS --- */
+        function renderCalendar() {
+            const grid = document.getElementById('calendar-days'); grid.innerHTML = '';
+            const y = state.currentDate.getFullYear(), m = state.currentDate.getMonth();
+            document.getElementById('calendar-month-year').innerText = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(state.currentDate);
+            const days = new Date(y, m + 1, 0).getDate();
+            for (let d = 1; d <= days; d++) {
+                const ds = `${y}-${(m+1).toString().padStart(2,'0')}-${d.toString().padStart(2,'0')}`;
+                const cell = document.createElement('div');
+                cell.className = `day-cell ${state.selectedDateStr === ds ? 'active' : ''} ${state.plans[ds] ? 'has-data' : ''}`;
+                cell.innerText = d; cell.onclick = () => selectDate(ds);
+                grid.appendChild(cell);
+            }
+        }
+        function selectDate(ds) {
+            state.selectedDateStr = ds; state.currentPlanIdx = 0;
+            document.getElementById('selected-date-label').innerText = "Date: " + ds;
+            document.getElementById('planner-input-area').style.display = 'block';
+            renderCalendar(); renderDayPlan();
+        }
 
-    let tbody = document.getElementById("timetable");
-    tbody.innerHTML = "";
+        function addPlanToRange() {
+            const sub = document.getElementById('p-sub').value, dur = parseInt(document.getElementById('p-duration').value), unit = document.getElementById('p-unit').value;
+            if(!sub || !state.selectedDateStr) return;
+            let totalDays = unit === 'days' ? dur : dur * 30;
+            let start = new Date(state.selectedDateStr);
+            for(let i = 0; i < totalDays; i++) {
+                let curr = new Date(start); curr.setDate(start.getDate() + i);
+                let ds = curr.toISOString().split('T')[0];
+                if(!state.plans[ds]) state.plans[ds] = [];
+                state.plans[ds].push({ name: sub, tasks: state.settings.ai ? [{txt:`Study ${sub} basics`, done:false}, {txt:`Practice ${sub} problems`, done:false}] : [{txt:`Read ${sub}`, done:false}] });
+            }
+            savePlans(); renderCalendar(); renderDayPlan();
+        }
 
-    let tasks = getTasks(selectedDay);
+        function toggleTask(idx) {
+            const today = new Date().toISOString().split('T')[0];
+            const plan = state.plans[state.selectedDateStr][state.currentPlanIdx];
+            plan.tasks[idx].done = !plan.tasks[idx].done;
+            
+            // Streak Logic: If finishing a task for the first time today
+            if(state.selectedDateStr === today && plan.tasks[idx].done && state.lastStreakDate !== today) {
+                state.streak++;
+                state.lastStreakDate = today;
+                localStorage.setItem('st_streak', state.streak);
+                localStorage.setItem('st_streak_date', today);
+            }
+            savePlans();
+        }
 
-    tasks.sort((a,b) => a.start.localeCompare(b.start));
+        function renderDayPlan() {
+            const q = state.plans[state.selectedDateStr] || [];
+            const fv = document.getElementById('focus-mode');
+            if(q.length === 0) { fv.style.display = 'none'; return; }
+            fv.style.display = 'block';
+            const cur = q[state.currentPlanIdx];
+            document.getElementById('focus-name').innerText = `${cur.name} (${state.currentPlanIdx + 1}/${q.length})`;
+            document.getElementById('focus-tasks').innerHTML = cur.tasks.map((t, i) => `
+                <li class="task-item"><input type="checkbox" ${t.done?'checked':''} onchange="toggleTask(${i})"> <span>${t.txt}</span></li>
+            `).join('');
+        }
 
-    tasks.forEach((t, i) => {
-        tbody.innerHTML += `
-        <tr>
-            <td>${t.start}</td>
-            <td>${t.end}</td>
-            <td>${t.subject}</td>
-            <td>${t.note || ""}</td>
-            <td>
-                <input type="checkbox" ${t.done ? "checked" : ""} onchange="toggle(${i})">
-            </td>
-            <td>
-                <button onclick="remove(${i})">X</button>
-            </td>
-        </tr>
-        `;
-    });
-}
+        /* --- SETTINGS & CORE --- */
+        function applySettings() {
+            localStorage.setItem('st_cfg', JSON.stringify(state.settings));
+            document.documentElement.setAttribute('data-mode', state.settings.mode);
+            document.documentElement.setAttribute('data-theme', state.settings.theme);
+            document.getElementById('set-dark').checked = state.settings.mode === 'dark';
+        }
+        function saveSet() {
+            state.settings.mode = document.getElementById('set-dark').checked ? 'dark' : 'light';
+            state.settings.ai = document.getElementById('set-ai').checked;
+            applySettings();
+        }
+        function setTheme(c) { state.settings.theme = c; applySettings(); }
+        function savePlans() { localStorage.setItem('st_plans_v4', JSON.stringify(state.plans)); }
+        function changeMonth(dir) { state.currentDate.setMonth(state.currentDate.getMonth() + dir); renderCalendar(); }
+        function nextSubject() { if(state.currentPlanIdx < (state.plans[state.selectedDateStr]||[]).length - 1) { state.currentPlanIdx++; renderDayPlan(); } }
+        function prevSubject() { if(state.currentPlanIdx > 0) { state.currentPlanIdx--; renderDayPlan(); } }
+        function clearDayPlan() { delete state.plans[state.selectedDateStr]; savePlans(); renderCalendar(); renderDayPlan(); }
 
-/* ================= ACTIONS ================= */
-function toggle(i) {
-    let tasks = getTasks(selectedDay);
-    tasks[i].done = !tasks[i].done;
-    saveTasks(selectedDay, tasks);
-    renderTable();
-    renderCalendar();
-    updateProgress();
-}
+        /* --- TIMETABLE --- */
+        function addSchedule() {
+            const sub = document.getElementById('tt-sub').value, day = document.getElementById('tt-day').value;
+            const start = document.getElementById('tt-start').value, end = document.getElementById('tt-end').value;
+            if(!sub || !start || !end) return;
+            state.timetable.push({ id: Date.now(), sub, day, start, end });
+            localStorage.setItem('st_tt', JSON.stringify(state.timetable));
+            renderTT();
+        }
+        function renderTT() {
+            const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+            document.getElementById('tt-list-tabulated').innerHTML = days.map(day => {
+                const daySubs = state.timetable.filter(i => i.day === day);
+                return `<tr><td>${day}</td><td><div style="display:flex; gap:10px; flex-wrap:wrap;">${daySubs.map(s => `
+                    <div style="background:var(--bg-body); padding:5px 10px; border-radius:8px; font-size:0.8rem; border:1px solid var(--border)">
+                    ${s.sub} (${s.start}) <span style="color:red; cursor:pointer" onclick="delTT(${s.id})">×</span></div>`).join('') || '---'}</div></td></tr>`;
+            }).join('');
+        }
+        function delTT(id) { state.timetable = state.timetable.filter(i => i.id !== id); localStorage.setItem('st_tt', JSON.stringify(state.timetable)); renderTT(); }
 
-function remove(i) {
-    let tasks = getTasks(selectedDay);
-    tasks.splice(i,1);
-    saveTasks(selectedDay, tasks);
-    renderTable();
-    renderCalendar();
-    updateProgress();
-}
+        /* --- TIMER --- */
+        let tmr, timeLeft = 1500, isRunning = false;
+        function toggleTimer() {
+            if(isRunning) clearInterval(tmr); else tmr = setInterval(() => { if(timeLeft <= 0) { document.getElementById('beep').play(); resetTimer(); } else timeLeft--; updateTmr(); }, 1000);
+            isRunning = !isRunning; document.getElementById('tm-start').innerText = isRunning ? "Pause" : "Start";
+        }
+        function resetTimer() { clearInterval(tmr); isRunning = false; timeLeft = document.getElementById('cfg-work').value * 60; updateTmr(); }
+        function updateTmr() { const m = Math.floor(timeLeft/60), s = timeLeft%60; document.getElementById('tm-display').innerText = `${m}:${s<10?'0'+s:s}`; }
 
-/* ================= PROGRESS ================= */
-function updateProgress() {
-    let all = 0;
-    let done = 0;
-
-    currentMonthDays.forEach(d => {
-        let tasks = getTasks(d.toDateString());
-        all += tasks.length;
-        done += tasks.filter(t => t.done).length;
-    });
-
-    let percent = all ? (done/all)*100 : 0;
-
-    document.getElementById("overallProgress").style.width = percent + "%";
-    document.getElementById("progressText").innerText = percent.toFixed(1) + "% completed";
-}
-
-</script>
-
+        applySettings();
+        updateHome();
+    </script>
 </body>
 </html>
