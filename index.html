@@ -6,9 +6,6 @@
 <title>StudyOS — Your Focus Command Centre</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
-/* ══════════════════════════════════════════
-   TOKENS & RESET
-══════════════════════════════════════════ */
 :root {
   --bg:        #0A0A0B;
   --surface:   #111113;
@@ -30,7 +27,6 @@
   --ease:      cubic-bezier(0.4,0,0.2,1);
   --ease-spring: cubic-bezier(0.34,1.56,0.64,1);
 }
-
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
 html{font-size:16px;scroll-behavior:smooth;}
 body{
@@ -39,17 +35,11 @@ body{
   line-height:1.6;min-height:100vh;overflow-x:hidden;
   cursor:default;
 }
-
-/* Noise texture overlay */
 body::before{
   content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
   opacity:0.4;
 }
-
-/* ══════════════════════════════════════════
-   SIDEBAR LAYOUT
-══════════════════════════════════════════ */
 .app-shell{
   display:grid;
   grid-template-columns:220px 1fr;
@@ -57,8 +47,6 @@ body::before{
   min-height:100vh;
   position:relative;z-index:1;
 }
-
-/* ── SIDEBAR ── */
 .sidebar{
   background:var(--surface);
   border-right:1px solid var(--border);
@@ -109,8 +97,6 @@ body::before{
   border:1px solid var(--border);font-size:0.8rem;color:var(--text3);
 }
 .sidebar-footer strong{display:block;color:var(--text2);margin-bottom:2px;font-size:0.82rem;}
-
-/* ── MAIN CONTENT ── */
 .main{
   background:var(--bg);
   padding:0;overflow-y:auto;
@@ -129,15 +115,10 @@ body::before{
 .page-header p{color:var(--text2);font-size:0.9rem;margin-top:4px;}
 .header-meta{text-align:right;font-family:'DM Mono',monospace;font-size:12px;color:var(--text3);}
 .header-meta strong{display:block;color:var(--text2);font-size:13px;}
-
 .content-area{padding:0 40px 48px;}
-
-/* ── TABS ── */
 .tab-page{display:none;animation:fadeUp 0.35s var(--ease) both;}
 .tab-page.active{display:block;}
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
-
-/* ── CARDS ── */
 .card{
   background:var(--surface);border:1px solid var(--border);
   border-radius:20px;padding:28px;margin-bottom:20px;
@@ -154,8 +135,6 @@ body::before{
   font-size:10px;padding:2px 8px;border-radius:20px;
   font-family:'DM Mono',monospace;letter-spacing:1px;
 }
-
-/* ── BUTTONS ── */
 .btn{
   display:inline-flex;align-items:center;gap:8px;
   background:var(--accent);color:#0A0A0B;
@@ -174,8 +153,8 @@ body::before{
 .btn-danger{background:var(--danger);color:white;}
 .btn-danger:hover{box-shadow:0 6px 20px rgba(224,82,82,0.3);}
 .btn-sm{padding:7px 14px;font-size:0.78rem;}
-
-/* ── INPUTS ── */
+.btn-green{background:#1e8449;color:white;}
+.btn-green:hover{box-shadow:0 6px 20px rgba(30,132,73,0.35);}
 .field{margin-bottom:16px;}
 .field label{
   display:block;font-family:'DM Mono',monospace;font-size:11px;
@@ -193,7 +172,7 @@ body::before{
 }
 .field select option{background:var(--surface2);}
 
-/* ═══════════════════ HOME ═══════════════════ */
+/* HOME */
 .home-hero{
   background:linear-gradient(135deg,var(--surface) 0%,var(--surface2) 100%);
   border:1px solid var(--border);border-radius:24px;
@@ -225,7 +204,7 @@ body::before{
 }
 .hero-stat .stat-lbl{font-size:0.8rem;color:var(--text3);margin-top:2px;}
 
-/* ═══════════════════ TIMETABLE ═══════════════════ */
+/* TIMETABLE */
 .tt-form-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:12px;align-items:end;margin-bottom:24px;}
 .day-block{
   border-radius:var(--radius);overflow:hidden;
@@ -264,7 +243,7 @@ body::before{
 .slot-del:hover{color:var(--danger);}
 .empty-slots{color:var(--text3);font-size:0.83rem;font-style:italic;padding:6px 2px;}
 
-/* ═══════════════════ TIMER ═══════════════════ */
+/* TIMER */
 .timer-wrap{
   display:flex;flex-direction:column;align-items:center;
   padding:40px 20px;
@@ -305,7 +284,7 @@ body::before{
 .session-dot.done{background:var(--accent);}
 .session-dot.active{background:var(--accent);box-shadow:0 0 8px var(--accent);}
 
-/* ═══════════════════ PLANNER / CALENDAR ═══════════════════ */
+/* PLANNER */
 .cal-header{
   display:flex;align-items:center;justify-content:space-between;
   margin-bottom:16px;
@@ -345,7 +324,6 @@ body::before{
 }
 .cal-cell.selected.has-plan::after{background:#0A0A0B;}
 .cal-cell.empty{background:transparent;border-color:transparent;cursor:default;pointer-events:none;}
-
 .plan-panel{
   background:var(--surface);border:1px solid var(--border);
   border-radius:20px;padding:24px;
@@ -364,8 +342,6 @@ body::before{
   display:grid;grid-template-columns:1fr 100px 120px auto;
   gap:10px;align-items:end;margin-bottom:16px;
 }
-
-/* Subject cards in planner */
 .subject-nav{
   display:flex;align-items:center;justify-content:space-between;
   background:var(--surface2);border-radius:var(--radius);padding:16px 20px;
@@ -393,7 +369,7 @@ body::before{
 .task-text{font-size:0.9rem;}
 .task-text.done{color:var(--text3);text-decoration:line-through;}
 
-/* ═══════════════════ SETTINGS ═══════════════════ */
+/* SETTINGS */
 .settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
 .setting-row{
   display:flex;align-items:center;justify-content:space-between;
@@ -402,9 +378,7 @@ body::before{
 .setting-row:last-child{border-bottom:none;}
 .setting-label{font-size:0.9rem;font-weight:500;}
 .setting-desc{font-size:0.78rem;color:var(--text3);margin-top:2px;}
-.toggle{
-  position:relative;width:44px;height:24px;cursor:pointer;
-}
+.toggle{position:relative;width:44px;height:24px;cursor:pointer;}
 .toggle input{opacity:0;width:0;height:0;}
 .toggle-track{
   position:absolute;inset:0;background:var(--surface3);
@@ -423,7 +397,192 @@ body::before{
 }
 .swatch.active,.swatch:hover{border-color:white;transform:scale(1.15);}
 
-/* ═══════════════════ RESPONSIVE ═══════════════════ */
+/* ═══════════════════ REPORT CARD ═══════════════════ */
+.rc-controls{
+  display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:14px;align-items:end;
+  margin-bottom:20px;
+}
+.rc-info-banner{
+  background:var(--surface2);border:1px solid var(--border2);
+  border-radius:var(--radius-sm);padding:14px 18px;
+  font-size:0.83rem;color:var(--text2);
+  display:flex;align-items:center;gap:10px;
+  margin-bottom:20px;
+}
+.rc-info-banner .rc-info-icon{font-size:18px;}
+.rc-empty{
+  text-align:center;padding:60px 20px;color:var(--text3);
+  font-size:0.9rem;
+}
+.rc-empty .rc-empty-icon{font-size:3rem;display:block;margin-bottom:12px;opacity:0.4;}
+.rc-actions{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+
+/* The printable card — always light */
+.rc-card{
+  background:#fff;color:#1a1a1a;
+  border-radius:12px;overflow:hidden;
+  border:1px solid rgba(0,0,0,0.12);
+  font-family:'DM Sans',sans-serif;
+  box-shadow:0 8px 40px rgba(0,0,0,0.35);
+}
+.rc-banner{
+  background:linear-gradient(135deg,#0e2f5a 0%,#1a5276 60%,#1e8449 100%);
+  padding:22px 28px;
+  display:grid;grid-template-columns:68px 1fr 68px;
+  align-items:center;gap:16px;
+}
+.rc-banner-logo{
+  width:60px;height:60px;background:rgba(255,255,255,0.15);
+  border-radius:50%;border:2px solid rgba(255,255,255,0.35);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.6rem;
+}
+.rc-banner-center{text-align:center;color:#fff;}
+.rc-banner-center h2{
+  font-family:'Syne',sans-serif;font-size:1.15rem;font-weight:800;
+  letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;
+}
+.rc-banner-center .school-name-rc{
+  font-size:0.75rem;opacity:0.85;letter-spacing:0.3px;
+  text-transform:uppercase;font-weight:500;
+}
+.rc-banner-center .rc-powered{
+  font-size:0.62rem;opacity:0.55;margin-top:4px;letter-spacing:0.5px;
+  font-family:'DM Mono',monospace;
+}
+.rc-banner-badge{
+  background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.28);
+  border-radius:10px;padding:8px 10px;text-align:center;color:#fff;
+}
+.rc-banner-badge .badge-label{font-size:8px;letter-spacing:1.5px;text-transform:uppercase;opacity:0.65;display:block;}
+.rc-banner-badge .badge-val{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;display:block;margin-top:2px;}
+
+.rc-meta{
+  display:grid;grid-template-columns:1fr 1fr;
+  border-bottom:2px solid #0e2f5a;
+}
+.rc-meta-col{padding:12px 22px;font-size:0.8rem;}
+.rc-meta-col:first-child{border-right:1px solid #e5e5e5;}
+.rc-meta-row{
+  display:flex;gap:8px;align-items:baseline;
+  padding:2px 0;
+}
+.rc-meta-key{
+  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;
+  text-transform:uppercase;color:#888;min-width:90px;flex-shrink:0;
+}
+.rc-meta-val{font-weight:600;font-size:0.83rem;color:#1a1a1a;}
+
+.rc-table-wrap{padding:0;overflow-x:auto;}
+.rc-table{width:100%;border-collapse:collapse;font-size:0.79rem;}
+.rc-table thead tr{background:#0e2f5a;}
+.rc-table thead th{
+  color:#fff;font-family:'DM Mono',monospace;
+  font-size:9px;letter-spacing:1.2px;text-transform:uppercase;
+  padding:10px 13px;text-align:left;font-weight:500;
+  border-right:1px solid rgba(255,255,255,0.1);
+  white-space:nowrap;
+}
+.rc-table thead th.center{text-align:center;}
+.rc-table thead th:last-child{border-right:none;}
+.rc-table tbody tr:nth-child(even){background:#f5f8fc;}
+.rc-table tbody tr:hover{background:#eef4fb;}
+.rc-table td{
+  padding:9px 13px;border-bottom:1px solid #e9ecef;
+  border-right:1px solid #e9ecef;color:#2c3e50;
+  vertical-align:middle;
+}
+.rc-table td:last-child{border-right:none;}
+.rc-table td.subject-cell{font-weight:600;color:#0e2f5a;min-width:130px;}
+.rc-table td.mark-cell{
+  font-family:'DM Mono',monospace;font-size:0.8rem;text-align:center;
+}
+.rc-table td.grade-cell{
+  font-family:'Syne',sans-serif;font-weight:800;font-size:0.92rem;
+  text-align:center;
+}
+.rc-table td.remark-cell{font-size:0.75rem;color:#555;font-style:italic;}
+.rc-table tfoot td{
+  background:#f0f4f8;font-weight:700;font-family:'Syne',sans-serif;
+  font-size:0.8rem;padding:10px 13px;border-top:2px solid #0e2f5a;
+  color:#0e2f5a;
+}
+
+.grade-A    {color:#1e8449;}
+.grade-Amin {color:#27ae60;}
+.grade-Bpl  {color:#1a5276;}
+.grade-B    {color:#2471a3;}
+.grade-Bmin {color:#2980b9;}
+.grade-Cpl  {color:#7d6608;}
+.grade-C    {color:#9a7d0a;}
+.grade-Cmin {color:#b7950b;}
+.grade-Dpl  {color:#a93226;}
+.grade-D    {color:#cb4335;}
+.grade-Dmin {color:#e74c3c;}
+.grade-E    {color:#c0392b;}
+
+.rc-summary{
+  display:grid;grid-template-columns:repeat(5,1fr);
+  background:#f0f4f8;border-top:2px solid #0e2f5a;
+  padding:16px 22px;gap:8px;
+}
+.rc-summary-box{text-align:center;padding:4px;}
+.rc-summary-box .sb-val{
+  font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;color:#0e2f5a;
+  display:block;line-height:1.1;
+}
+.rc-summary-box .sb-val.mean{font-size:2rem;color:#1e8449;}
+.rc-summary-box .sb-lbl{
+  font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;
+  text-transform:uppercase;color:#888;margin-top:4px;display:block;
+}
+.rc-summary-divider{
+  border-left:1px solid #d0d8e4;margin:0 4px;
+}
+
+.rc-remarks{
+  padding:14px 22px;border-top:1px solid #e5e5e5;
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;font-size:0.78rem;
+}
+.rc-remark-block label{
+  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;
+  text-transform:uppercase;color:#888;display:block;margin-bottom:5px;
+}
+.rc-remark-block p{
+  color:#2c3e50;padding:8px 10px;
+  background:#f8f9fa;border-left:3px solid #0e2f5a;
+  border-radius:0 4px 4px 0;min-height:38px;line-height:1.5;font-size:0.8rem;
+}
+
+.rc-sig-row{
+  padding:12px 22px;border-top:1px solid #e5e5e5;
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;
+}
+.rc-sig{text-align:center;font-size:0.7rem;color:#888;}
+.rc-sig .sig-line{
+  border-bottom:1px solid #aaa;margin-bottom:4px;height:24px;
+}
+
+.rc-footer{
+  background:#0e2f5a;padding:8px 22px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.rc-footer span{
+  font-family:'DM Mono',monospace;font-size:0.65rem;
+  color:rgba(255,255,255,0.45);letter-spacing:0.5px;
+}
+.rc-footer .zeraki-tag{
+  color:rgba(255,255,255,0.7);font-weight:600;letter-spacing:1px;
+  font-size:0.68rem;
+}
+
+/* Progress bar in report card */
+.rc-progress-bar{
+  height:4px;background:#e0e0e0;border-radius:2px;margin-top:4px;
+  overflow:hidden;min-width:60px;
+}
+.rc-progress-fill{height:100%;border-radius:2px;transition:width 0.3s;}
+
 @media(max-width:768px){
   .app-shell{grid-template-columns:1fr;}
   .sidebar{
@@ -442,15 +601,16 @@ body::before{
   .hero-stats{grid-template-columns:1fr;}
   .settings-grid{grid-template-columns:1fr;}
   .home-hero h2{font-size:1.8rem;}
+  .rc-controls{grid-template-columns:1fr 1fr;}
+  .rc-summary{grid-template-columns:repeat(3,1fr);}
+  .rc-remarks{grid-template-columns:1fr;}
 }
 
-/* ═══ SCROLLBAR ═══ */
 ::-webkit-scrollbar{width:6px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:10px;}
 ::-webkit-scrollbar-thumb:hover{background:var(--border2);}
 
-/* ═══ NOTIFICATION TOAST ═══ */
 .toast{
   position:fixed;bottom:28px;right:28px;z-index:999;
   background:var(--surface);border:1px solid var(--border2);
@@ -464,13 +624,27 @@ body::before{
 }
 .toast.show{transform:translateY(0);opacity:1;}
 .toast-icon{font-size:18px;}
+
+@media print{
+  .sidebar,.page-header,.rc-controls,.rc-actions,
+  .toast,.btn{display:none!important;}
+  .app-shell{display:block;}
+  .main{padding:0;}
+  .content-area{padding:0;}
+  .card{border:none;padding:0;background:transparent;box-shadow:none;}
+  .rc-card{box-shadow:none;border-radius:0;}
+  body,html{background:#fff;}
+  .tab-page{display:block!important;}
+  #page-report{display:block!important;}
+  #page-home,#page-timetable,#page-pomodoro,#page-planner,#page-settings{display:none!important;}
+}
 </style>
 </head>
 <body>
 
 <div class="app-shell">
 
-  <!-- ══════════ SIDEBAR ══════════ -->
+  <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="sidebar-logo">
       <div class="dot"></div>
@@ -493,6 +667,11 @@ body::before{
       <span class="nav-icon">◈</span> AI Planner
     </div>
 
+    <span class="sidebar-section">Reports</span>
+    <div class="nav-item" onclick="showPage('report')" id="n-report">
+      <span class="nav-icon">📋</span> Report Card
+    </div>
+
     <span class="sidebar-section">System</span>
     <div class="nav-item" onclick="showPage('settings')" id="n-settings">
       <span class="nav-icon">⚙</span> Settings
@@ -504,10 +683,10 @@ body::before{
     </div>
   </aside>
 
-  <!-- ══════════ MAIN ══════════ -->
+  <!-- MAIN -->
   <div class="main">
 
-    <!-- ── HOME ── -->
+    <!-- HOME -->
     <div id="page-home" class="tab-page active">
       <div class="page-header">
         <div>
@@ -542,7 +721,7 @@ body::before{
       </div>
     </div>
 
-    <!-- ── TIMETABLE ── -->
+    <!-- TIMETABLE -->
     <div id="page-timetable" class="tab-page">
       <div class="page-header">
         <div>
@@ -566,7 +745,6 @@ body::before{
             <div class="field" style="margin:0"><label>&nbsp;</label><button class="btn" onclick="addTT()">+ Add</button></div>
           </div>
         </div>
-
         <div class="card" id="tt-schedule-card">
           <div class="card-title">Schedule <span class="pill" id="tt-count">0 slots</span></div>
           <div id="tt-blocks"></div>
@@ -574,7 +752,7 @@ body::before{
       </div>
     </div>
 
-    <!-- ── POMODORO ── -->
+    <!-- POMODORO -->
     <div id="page-pomodoro" class="tab-page">
       <div class="page-header">
         <div>
@@ -615,7 +793,7 @@ body::before{
       </div>
     </div>
 
-    <!-- ── PLANNER ── -->
+    <!-- PLANNER -->
     <div id="page-planner" class="tab-page">
       <div class="page-header">
         <div>
@@ -637,13 +815,11 @@ body::before{
             <div class="cal-wday">Sa</div>
           </div>
           <div class="cal-grid" id="cal-grid"></div>
-
           <div class="plan-panel" id="plan-panel">
             <div class="plan-date-label">
               <span id="plan-date-text">—</span>
               <span class="badge">Selected</span>
             </div>
-
             <div class="plan-form-row">
               <div class="field" style="margin:0"><label>Subject</label><input type="text" id="p-sub" placeholder="e.g. Mathematics"/></div>
               <div class="field" style="margin:0"><label>Duration</label><input type="number" id="p-dur" value="1" min="1"/></div>
@@ -652,7 +828,6 @@ body::before{
               </div>
               <div class="field" style="margin:0"><label>&nbsp;</label><button class="btn" onclick="applyPlan()">Apply →</button></div>
             </div>
-
             <div id="plan-subjects-wrap" style="display:none;margin-top:20px;">
               <div class="subject-nav">
                 <div>
@@ -674,7 +849,57 @@ body::before{
       </div>
     </div>
 
-    <!-- ── SETTINGS ── -->
+    <!-- ══════════ REPORT CARD ══════════ -->
+    <div id="page-report" class="tab-page">
+      <div class="page-header">
+        <div>
+          <h1>Zeraki <span>Report Card</span></h1>
+          <p>Auto-generated from your timetable &amp; study logs.</p>
+        </div>
+      </div>
+      <div class="content-area">
+        <div class="card">
+          <div class="card-title">Report Settings</div>
+          <div class="rc-controls">
+            <div class="field" style="margin:0">
+              <label>Student Name</label>
+              <input type="text" id="rc-name" placeholder="e.g. Amara Odhiambo"/>
+            </div>
+            <div class="field" style="margin:0">
+              <label>School Name</label>
+              <input type="text" id="rc-school" placeholder="e.g. Nairobi Academy"/>
+            </div>
+            <div class="field" style="margin:0">
+              <label>Term / Exam</label>
+              <select id="rc-term">
+                <option>Term 1 — 2025</option>
+                <option>Term 2 — 2025</option>
+                <option>Term 3 — 2025</option>
+                <option>Term 1 — 2026</option>
+                <option>Term 2 — 2026</option>
+                <option>Term 3 — 2026</option>
+                <option>Mid-Term Exam</option>
+                <option>End of Term Exam</option>
+                <option>Mock Examination</option>
+                <option>KCSE Trial Exam</option>
+              </select>
+            </div>
+            <div class="field" style="margin:0">
+              <label>&nbsp;</label>
+              <button class="btn" onclick="generateReport()">⚡ Generate</button>
+            </div>
+          </div>
+          <div class="rc-info-banner">
+            <span class="rc-info-icon">ℹ️</span>
+            <span>Scores are computed from your <strong>timetable subjects</strong> and <strong>planner activity</strong> — more study days &amp; completed tasks = higher marks. Add subjects in Timetable and log study sessions in AI Planner first.</span>
+          </div>
+        </div>
+
+        <div id="rc-output"></div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
     <div id="page-settings" class="tab-page">
       <div class="page-header">
         <div>
@@ -723,7 +948,7 @@ body::before{
           <div class="card">
             <div class="card-title">About</div>
             <div style="font-size:0.85rem;color:var(--text3);line-height:1.8;">
-              <strong style="color:var(--text2);">StudyOS v2.0</strong><br>
+              <strong style="color:var(--text2);">StudyOS v2.1</strong><br>
               Your personal focus command centre.<br>
               All data stored locally in your browser.
             </div>
@@ -769,8 +994,6 @@ function init(){
   const h = new Date().getHours();
   document.getElementById('greeting-word').textContent =
     h < 12 ? 'Morning' : h < 17 ? 'Afternoon' : 'Evening';
-
-  // Persist timer progress ring circumference
   const r = 110;
   const circ = 2 * Math.PI * r;
   document.getElementById('ring-fill').style.strokeDasharray = circ;
@@ -826,7 +1049,6 @@ function applySettings(){
   document.documentElement.style.setProperty('--accent-glow',hexAlpha(S.settings.accent,0.22));
   document.getElementById('set-ai').checked   = S.settings.ai;
   document.getElementById('set-sound').checked= S.settings.sound;
-  // Mark swatch
   document.querySelectorAll('.swatch').forEach(s=>{
     s.classList.toggle('active', s.dataset.color === S.settings.accent);
   });
@@ -951,7 +1173,6 @@ function updateTmrDisplay(){
   const m=Math.floor(tmrLeft/60),s=tmrLeft%60;
   document.getElementById('tm-display').textContent=`${m}:${s<10?'0'+s:s}`;
   document.getElementById('tm-phase').textContent=tmrPhase==='work'?'FOCUS':'BREAK';
-  // Ring
   const total=(tmrPhase==='work'
     ? parseInt(document.getElementById('cfg-work').value)
     : parseInt(document.getElementById('cfg-break').value))*60;
@@ -977,11 +1198,9 @@ function renderCalendar(){
   document.getElementById('cal-label').textContent =
     new Intl.DateTimeFormat('en-US',{month:'long',year:'numeric'}).format(S.calDate);
   const daysInMonth=new Date(y,m+1,0).getDate();
-  const firstDay=new Date(y,m,1).getDay(); // 0=Sun
+  const firstDay=new Date(y,m,1).getDay();
   const today=new Date();
   const todayStr=dateStr(today);
-
-  // blank cells
   for(let i=0;i<firstDay;i++){
     const e=document.createElement('div');
     e.className='cal-cell empty'; grid.appendChild(e);
@@ -1061,6 +1280,339 @@ function clearDay(){
   renderCalendar(); renderPlanSubjects();
   toast('Day cleared','🗑');
   updateHomeStats();
+}
+
+/* ══════════════════════════════════════
+   REPORT CARD — ZERAKI STYLE
+══════════════════════════════════════ */
+
+// Deterministic hash seed from subject name (for consistent variation)
+function subjectSeed(name){
+  let h = 0;
+  for(let i=0;i<name.length;i++) h = ((h<<5)-h)+name.charCodeAt(i)|0;
+  return Math.abs(h);
+}
+
+// Kenya KCSE grading
+function getGrade(mark){
+  if(mark>=80) return {g:'A',  cls:'grade-A',   pts:12, rem:'Excellent'};
+  if(mark>=75) return {g:'A-', cls:'grade-Amin', pts:11, rem:'Very Good'};
+  if(mark>=70) return {g:'B+', cls:'grade-Bpl',  pts:10, rem:'Good'};
+  if(mark>=65) return {g:'B',  cls:'grade-B',    pts:9,  rem:'Good'};
+  if(mark>=60) return {g:'B-', cls:'grade-Bmin', pts:8,  rem:'Above Average'};
+  if(mark>=55) return {g:'C+', cls:'grade-Cpl',  pts:7,  rem:'Average'};
+  if(mark>=50) return {g:'C',  cls:'grade-C',    pts:6,  rem:'Average'};
+  if(mark>=45) return {g:'C-', cls:'grade-Cmin', pts:5,  rem:'Below Average'};
+  if(mark>=40) return {g:'D+', cls:'grade-Dpl',  pts:4,  rem:'Below Average'};
+  if(mark>=35) return {g:'D',  cls:'grade-D',    pts:3,  rem:'Poor'};
+  if(mark>=30) return {g:'D-', cls:'grade-Dmin', pts:2,  rem:'Very Poor'};
+  return              {g:'E',  cls:'grade-E',     pts:1,  rem:'Fail'};
+}
+
+function getMeanGrade(avgPts){
+  if(avgPts>=11.5) return {g:'A',  cls:'grade-A'};
+  if(avgPts>=10.5) return {g:'A-', cls:'grade-Amin'};
+  if(avgPts>=9.5)  return {g:'B+', cls:'grade-Bpl'};
+  if(avgPts>=8.5)  return {g:'B',  cls:'grade-B'};
+  if(avgPts>=7.5)  return {g:'B-', cls:'grade-Bmin'};
+  if(avgPts>=6.5)  return {g:'C+', cls:'grade-Cpl'};
+  if(avgPts>=5.5)  return {g:'C',  cls:'grade-C'};
+  if(avgPts>=4.5)  return {g:'C-', cls:'grade-Cmin'};
+  if(avgPts>=3.5)  return {g:'D+', cls:'grade-Dpl'};
+  if(avgPts>=2.5)  return {g:'D',  cls:'grade-D'};
+  if(avgPts>=1.5)  return {g:'D-', cls:'grade-Dmin'};
+  return                  {g:'E',  cls:'grade-E'};
+}
+
+// Calculate a mark for a subject based on study data
+function calcSubjectMark(subName){
+  const seed = subjectSeed(subName);
+
+  // Count days this subject appears in plans
+  let studyDays = 0;
+  let doneTasks = 0;
+  let totalTasks = 0;
+
+  Object.values(S.plans).forEach(dayPlans => {
+    dayPlans.forEach(plan => {
+      if(plan.name.toLowerCase().trim() === subName.toLowerCase().trim()){
+        studyDays++;
+        plan.tasks.forEach(t => {
+          totalTasks++;
+          if(t.done) doneTasks++;
+        });
+      }
+    });
+  });
+
+  const totalPlanDays = Object.keys(S.plans).length;
+
+  // Consistency score: how many days was this subject studied (cap at 40 pts)
+  let consistencyPts = 0;
+  if(totalPlanDays > 0){
+    consistencyPts = Math.min((studyDays / Math.max(totalPlanDays, 1)) * 80, 40);
+  } else {
+    // No plans at all — use seed to give a baseline
+    consistencyPts = 20 + (seed % 15);
+  }
+
+  // Completion score: task completion rate (cap at 40 pts)
+  let completionPts = 0;
+  if(totalTasks > 0){
+    completionPts = (doneTasks / totalTasks) * 40;
+  } else if(studyDays > 0){
+    completionPts = 20;
+  } else {
+    completionPts = 10 + (seed % 15);
+  }
+
+  // Subject variety bonus from seed (±10)
+  const varietyBonus = (seed % 21) - 5;
+
+  const raw = Math.round(consistencyPts + completionPts + varietyBonus);
+  return Math.max(30, Math.min(99, raw));
+}
+
+// Generate and render the report card
+function generateReport(){
+  const studentName = document.getElementById('rc-name').value.trim() || 'Student';
+  const schoolName  = document.getElementById('rc-school').value.trim() || 'StudyOS High School';
+  const term        = document.getElementById('rc-term').value;
+  const out         = document.getElementById('rc-output');
+
+  // Gather subjects from timetable
+  const subjects = [...new Set(S.timetable.map(i=>i.sub))];
+
+  if(subjects.length === 0){
+    out.innerHTML = `<div class="card">
+      <div class="rc-empty">
+        <span class="rc-empty-icon">📚</span>
+        No subjects found. Please add subjects to your <strong>Timetable</strong> first, then log study days in the <strong>AI Planner</strong>.
+      </div>
+    </div>`;
+    return;
+  }
+
+  // Compute marks for each subject
+  const rows = subjects.map((sub, idx) => {
+    const total = calcSubjectMark(sub);
+    const seed  = subjectSeed(sub);
+
+    // Distribute total across CAT1/CAT2/Exam
+    // CAT1 max 30, CAT2 max 30, Exam max 40 (proportional)
+    const cat1  = Math.min(Math.round(total * 0.30 + ((seed % 7) - 3)), 30);
+    const cat2  = Math.min(Math.round(total * 0.30 + (((seed>>3) % 7) - 3)), 30);
+    const exam  = Math.min(Math.round(total * 0.40 + (((seed>>6) % 5) - 2)), 40);
+    const final = cat1 + cat2 + exam;
+
+    const gr    = getGrade(final);
+    const pct   = Math.round((final/100)*100);
+    const barColor = final>=75?'#1e8449':final>=60?'#2471a3':final>=50?'#9a7d0a':final>=40?'#cb4335':'#c0392b';
+
+    return { sub, cat1, cat2, exam, final, gr, pct, barColor, idx };
+  });
+
+  // Stats
+  const totalPoints = rows.reduce((a,r)=>a+r.gr.pts,0);
+  const avgPoints   = totalPoints / rows.length;
+  const meanGrade   = getMeanGrade(avgPoints);
+  const totalMarks  = rows.reduce((a,r)=>a+r.final,0);
+  const avgMark     = Math.round(totalMarks / rows.length);
+
+  // Simulated position (seed from student name)
+  const nameSeed    = subjectSeed(studentName);
+  const classSize   = 35 + (nameSeed % 15);
+  const position    = Math.max(1, Math.round(avgPoints > 9 ? 1+(nameSeed%4) : avgPoints > 7 ? 3+(nameSeed%6) : 8+(nameSeed%12)));
+
+  // Class average (slightly below student)
+  const classAvg    = Math.max(30, avgMark - 5 - (nameSeed%8));
+
+  // Comments based on mean grade
+  const commentMap = {
+    'A':  'An outstanding performance! Maintain this exceptional standard.',
+    'A-': 'Excellent work across all subjects. Keep pushing for perfection.',
+    'B+': 'Very good performance. With focused effort, A grades are within reach.',
+    'B':  'Good academic performance. Consistent revision will improve your scores.',
+    'B-': 'Above average performance. Identify weak areas and seek extra help.',
+    'C+': 'Average performance. More dedication and practice are needed.',
+    'C':  'Satisfactory performance. Please work harder and consult your teachers.',
+    'C-': 'Below average. Urgent improvement is needed — seek extra coaching.',
+    'D+': 'Poor performance. Develop a serious study plan immediately.',
+    'D':  'Very poor performance. Parental involvement and tutoring recommended.',
+    'D-': 'Extremely poor. Immediate intervention and support are critical.',
+    'E':  'Failed to meet minimum standards. Please seek urgent academic help.'
+  };
+  const principalComment = commentMap[meanGrade.g] || 'Keep working hard.';
+  const classTeacherComment = rows.length >= 6
+    ? `${studentName.split(' ')[0]} has shown ${meanGrade.g.startsWith('A') ? 'commendable' : meanGrade.g.startsWith('B') ? 'good' : 'developing'} academic ability. ${meanGrade.g <= 'C' ? 'More effort is required.' : 'Continue with the same spirit.'}`
+    : `${studentName.split(' ')[0]} is making progress. Regular attendance and revision are encouraged.`;
+
+  const now = new Date();
+  const dateGenerated = now.toLocaleDateString('en-KE',{day:'numeric',month:'long',year:'numeric'});
+
+  // Render
+  out.innerHTML = `
+  <div class="rc-actions">
+    <button class="btn btn-green" onclick="window.print()">🖨️ Print Report Card</button>
+    <button class="btn btn-ghost" onclick="document.getElementById('rc-output').innerHTML=''">✕ Close</button>
+  </div>
+  <div class="rc-card" id="the-report-card">
+
+    <!-- BANNER -->
+    <div class="rc-banner">
+      <div class="rc-banner-logo">🎓</div>
+      <div class="rc-banner-center">
+        <h2>Academic Report Card</h2>
+        <div class="school-name-rc">${escHtml(schoolName)}</div>
+        <div class="rc-powered">Generated by StudyOS · Zeraki Format</div>
+      </div>
+      <div class="rc-banner-badge">
+        <span class="badge-label">Term</span>
+        <span class="badge-val">${escHtml(term.split('—')[0].trim())}</span>
+      </div>
+    </div>
+
+    <!-- META -->
+    <div class="rc-meta">
+      <div class="rc-meta-col">
+        <div class="rc-meta-row"><span class="rc-meta-key">Student</span><span class="rc-meta-val">${escHtml(studentName)}</span></div>
+        <div class="rc-meta-row"><span class="rc-meta-key">School</span><span class="rc-meta-val">${escHtml(schoolName)}</span></div>
+        <div class="rc-meta-row"><span class="rc-meta-key">Term / Exam</span><span class="rc-meta-val">${escHtml(term)}</span></div>
+      </div>
+      <div class="rc-meta-col">
+        <div class="rc-meta-row"><span class="rc-meta-key">Subjects</span><span class="rc-meta-val">${rows.length}</span></div>
+        <div class="rc-meta-row"><span class="rc-meta-key">Study Days</span><span class="rc-meta-val">${Object.keys(S.plans).length} logged</span></div>
+        <div class="rc-meta-row"><span class="rc-meta-key">Date Generated</span><span class="rc-meta-val">${dateGenerated}</span></div>
+      </div>
+    </div>
+
+    <!-- PERFORMANCE TABLE -->
+    <div class="rc-table-wrap">
+      <table class="rc-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Subject</th>
+            <th class="center">CAT 1 /30</th>
+            <th class="center">CAT 2 /30</th>
+            <th class="center">Exam /40</th>
+            <th class="center">Total /100</th>
+            <th class="center">%</th>
+            <th class="center">Grade</th>
+            <th class="center">Pts</th>
+            <th>Remarks</th>
+            <th>Progress</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map((r,i)=>`
+          <tr>
+            <td class="mark-cell" style="color:#aaa;font-size:0.72rem;">${i+1}</td>
+            <td class="subject-cell">${escHtml(r.sub)}</td>
+            <td class="mark-cell">${r.cat1}</td>
+            <td class="mark-cell">${r.cat2}</td>
+            <td class="mark-cell">${r.exam}</td>
+            <td class="mark-cell" style="font-weight:700;color:#0e2f5a;">${r.final}</td>
+            <td class="mark-cell">${r.pct}%</td>
+            <td class="grade-cell ${r.gr.cls}">${r.gr.g}</td>
+            <td class="mark-cell" style="font-weight:700;">${r.gr.pts}</td>
+            <td class="remark-cell">${r.gr.rem}</td>
+            <td style="padding:9px 13px;min-width:80px;">
+              <div class="rc-progress-bar">
+                <div class="rc-progress-fill" style="width:${r.pct}%;background:${r.barColor};"></div>
+              </div>
+            </td>
+          </tr>`).join('')}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="2">TOTALS / AVERAGE</td>
+            <td class="mark-cell" style="text-align:center;">${rows.reduce((a,r)=>a+r.cat1,0)}</td>
+            <td class="mark-cell" style="text-align:center;">${rows.reduce((a,r)=>a+r.cat2,0)}</td>
+            <td class="mark-cell" style="text-align:center;">${rows.reduce((a,r)=>a+r.exam,0)}</td>
+            <td class="mark-cell" style="text-align:center;font-weight:800;">${totalMarks} (Avg: ${avgMark})</td>
+            <td colspan="2" style="text-align:center;">Mean: <span class="${meanGrade.cls}" style="font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;">${meanGrade.g}</span></td>
+            <td class="mark-cell" style="font-weight:800;">${totalPoints}</td>
+            <td colspan="2"></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <!-- SUMMARY STRIP -->
+    <div class="rc-summary">
+      <div class="rc-summary-box">
+        <span class="sb-val mean ${meanGrade.cls}">${meanGrade.g}</span>
+        <span class="sb-lbl">Mean Grade</span>
+      </div>
+      <div class="rc-summary-box">
+        <span class="sb-val">${avgMark}%</span>
+        <span class="sb-lbl">Avg Mark</span>
+      </div>
+      <div class="rc-summary-box">
+        <span class="sb-val">${avgPoints.toFixed(1)}</span>
+        <span class="sb-lbl">Mean Points</span>
+      </div>
+      <div class="rc-summary-box">
+        <span class="sb-val">${position}<sup style="font-size:0.6em;">${ordinal(position)}</sup></span>
+        <span class="sb-lbl">Position / ${classSize}</span>
+      </div>
+      <div class="rc-summary-box">
+        <span class="sb-val">${classAvg}%</span>
+        <span class="sb-lbl">Class Avg</span>
+      </div>
+    </div>
+
+    <!-- REMARKS -->
+    <div class="rc-remarks">
+      <div class="rc-remark-block">
+        <label>Class Teacher's Comment</label>
+        <p>${classTeacherComment}</p>
+      </div>
+      <div class="rc-remark-block">
+        <label>Principal's Comment</label>
+        <p>${principalComment}</p>
+      </div>
+      <div class="rc-remark-block">
+        <label>Next Term Begins</label>
+        <p style="font-style:normal;color:#0e2f5a;font-weight:600;">To be announced.<br><span style="font-size:0.75rem;color:#888;font-weight:400;">Please check school notice board.</span></p>
+      </div>
+    </div>
+
+    <!-- SIGNATURES -->
+    <div class="rc-sig-row">
+      <div class="rc-sig">
+        <div class="sig-line"></div>
+        <div>Class Teacher</div>
+      </div>
+      <div class="rc-sig">
+        <div class="sig-line"></div>
+        <div>Principal / Head Teacher</div>
+      </div>
+      <div class="rc-sig">
+        <div class="sig-line"></div>
+        <div>Parent / Guardian</div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="rc-footer">
+      <span>${escHtml(schoolName)} · ${escHtml(term)}</span>
+      <span class="zeraki-tag">ZERAKI FORMAT · StudyOS v2.1</span>
+    </div>
+
+  </div>`;
+
+  toast(`Report card generated for ${studentName}`, '📋');
+}
+
+function ordinal(n){
+  const s=['th','st','nd','rd'], v=n%100;
+  return (s[(v-20)%10]||s[v]||s[0]);
+}
+
+function escHtml(str){
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 /* ══════════════════════════════════════
